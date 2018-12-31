@@ -2,6 +2,6 @@
 
 import Foundation
 
-protocol ___VARIABLE_ModuleName___RouterType {
+protocol ___VARIABLE_ModuleName___RouterType: SttRouterType {
     
 }
