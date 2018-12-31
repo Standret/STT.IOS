@@ -9,4 +9,6 @@ class ___VARIABLE_ModuleName___ViewController: SttViewController<___VARIABLE_Mod
         super.viewDidLoad()
 
 	}
+
+    // MARK: implementation of ___VARIABLE_ModuleName___ViewDelegate
 }
