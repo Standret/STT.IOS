@@ -27,9 +27,9 @@ protocol SttHttpServiceType {
     var token: String { get set }
     var tokenType: String { get set }
     
-    func get(controller: ApiConroller, data: [String:String], insertToken: Bool) -> Observable<(HTTPURLResponse, Data)>
-    func post(controller: ApiConroller, data: [String:String], insertToken: Bool) -> Observable<(HTTPURLResponse, Data)>
-    func post(controller: ApiConroller, data: Encodable?, insertToken: Bool) -> Observable<(HTTPURLResponse, Data)>
+    func get(controller: ApiConroller, data: [String:String], headers: [String:String], insertToken: Bool) -> Observable<(HTTPURLResponse, Data)>
+    func post(controller: ApiConroller, data: [String:String], headers: [String:String], insertToken: Bool, isFormUrlEncoding: Bool) -> Observable<(HTTPURLResponse, Data)>
+    func post(controller: ApiConroller, data: Encodable?, headers: [String:String], insertToken: Bool, isFormUrlEncoding: Bool) -> Observable<(HTTPURLResponse, Data)>
     func upload(controller: ApiConroller, data: Data, parameter: [String:String], progresHandler: ((Float) -> Void)?) -> Observable<(HTTPURLResponse, Data)>
 }
 
@@ -40,19 +40,19 @@ class SttHttpService: SttHttpServiceType {
     var tokenType: String = ""
     var connectivity = SttConectivity()
     
-    init() {
+    init(url: String) {
+        self.url = url
         token = KeychainSwift().get(Constants.tokenKey) ?? ""
         tokenType = "bearer"
     }
     
-    func  get(controller: ApiConroller, data: [String:String], insertToken: Bool) -> Observable<(HTTPURLResponse, Data)> {
+    func  get(controller: ApiConroller, data: [String:String], headers: [String:String], insertToken: Bool) -> Observable<(HTTPURLResponse, Data)> {
         let url = "\(self.url!)\(controller.get())"
-        var _insertToken = insertToken
         
-        print("get")
-        print(Thread.current)
+       // print("get")
+       // print(Thread.current)
         return Observable<(HTTPURLResponse, Data)>.create { (observer) -> Disposable in
-            SttLog.trace(message: url, key: Constants.httpKeyLog)
+            //SttLog.trace(message: url, key: Constants.httpKeyLog)
             
             if !self.connectivity.isConnected {
                 sleep(Constants.timeWaitNextRequest)
@@ -60,11 +60,13 @@ class SttHttpService: SttHttpServiceType {
                 return Disposables.create()
             }
             
-            if self.token == "" {
-                _insertToken = false
+            var _headers = headers
+            if insertToken && !SttString.isEmpty(string: self.token) {
+                _headers["Authorization"] = "\(self.tokenType)\(self.token)"
             }
+            
             return requestData(.get, url, parameters: data, encoding: URLEncoding.default,
-                               headers: _insertToken ? ["Authorization" : "\(self.tokenType) \(self.token)"] : nil)
+                               headers: _headers)
                 .subscribe(onNext: { (res, data) in
                     observer.onNext((res, data))
                     observer.onCompleted()
@@ -77,12 +79,11 @@ class SttHttpService: SttHttpServiceType {
     
     /// if key parametr is empty string and parametr is simple type, its will be insert in raw body
     // TODO: -- write handler for check if value empty key is simpleType
-    func post(controller: ApiConroller, data: [String:String], insertToken: Bool) -> Observable<(HTTPURLResponse, Data)> {
+    func post(controller: ApiConroller, data: [String:String], headers: [String:String], insertToken: Bool, isFormUrlEncoding: Bool) -> Observable<(HTTPURLResponse, Data)> {
         let url = "\(self.url!)\(controller.get())"
-        var _insertToken = insertToken
         
         return Observable<(HTTPURLResponse, Data)>.create { (observer) -> Disposable in
-            SttLog.trace(message: url, key: Constants.httpKeyLog)
+           // SttLog.trace(message: url, key: Constants.httpKeyLog)
             
             if !self.connectivity.isConnected {
                 sleep(Constants.timeWaitNextRequest)
@@ -90,12 +91,13 @@ class SttHttpService: SttHttpServiceType {
                 return Disposables.create()
             }
             
-            if self.token == "" {
-                _insertToken = false
+            var _headers = headers
+            if insertToken && !SttString.isEmpty(string: self.token) {
+                _headers["Authorization"] = "\(self.tokenType)\(self.token)"
             }
 
             return requestData(.post, url, parameters: data, encoding: URLEncoding.httpBody,
-                               headers: _insertToken ? ["Authorization" : "\(self.tokenType) \(self.token)"] : nil)
+                               headers: _headers)
                 .subscribe(onNext: { (res, data) in
                     observer.onNext((res, data))
                     observer.onCompleted()
@@ -104,11 +106,11 @@ class SttHttpService: SttHttpServiceType {
             .configurateParamet()
     }
     
-    func post(controller: ApiConroller, data: Encodable?, insertToken: Bool) -> Observable<(HTTPURLResponse, Data)> {
+    func post(controller: ApiConroller, data: Encodable?, headers: [String:String], insertToken: Bool, isFormUrlEncoding: Bool) -> Observable<(HTTPURLResponse, Data)> {
         let url = "\(self.url!)\(controller.get())"
         
         return Observable<(HTTPURLResponse, Data)>.create { (observer) -> Disposable in
-            SttLog.trace(message: url, key: Constants.httpKeyLog)
+         //   SttLog.trace(message: url, key: Constants.httpKeyLog)
             
             if !self.connectivity.isConnected {
                 sleep(Constants.timeWaitNextRequest)
@@ -121,10 +123,20 @@ class SttHttpService: SttHttpServiceType {
             
             request.httpBody = (data?.getJsonString().data(using: .utf8, allowLossyConversion: false))
             
+            for lhitem in headers {
+                request.setValue(lhitem.value, forHTTPHeaderField: lhitem.key)
+            }
+            
             if insertToken && SttString.isEmpty(string: self.token) {
                 request.setValue("\(self.tokenType) \(self.token)", forHTTPHeaderField: "Authorization")
             }
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            if isFormUrlEncoding {
+                request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            }
+            else {
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            }
             
             return requestData(request)
                 .subscribe(onNext: { (res, data) in

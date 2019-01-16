@@ -1,5 +1,5 @@
 //
-//  InputBox.swift
+//  SttInputBox.swift
 //  Lemon
 //
 //  Created by Standret on 12/13/18.
@@ -16,37 +16,67 @@ enum TypeInputBox {
 }
 
 @IBDesignable
-class InputBox: UIView, SttViewable {
+class SttInputBox: UIView, SttViewable {
     
-    var textField: UITextField!
+    private var _textField: UITextField!
+    var textField: UITextField { return _textField }
     private var label: UILabel!
     private var errorLabel: UILabel!
     private var underline: UIView!
     
     private var isEdited = false
     
+    private var textsLeft = [NSLayoutConstraint]()
+    private var textsRight = [NSLayoutConstraint]()
+    
     let textFieldHandler = SttHandlerTextField()
     
     private var cnstrUnderlineHeight: NSLayoutConstraint!
     private var cnstrErrorHeight: NSLayoutConstraint!
     
-    var isError: Bool { return !SttString.isWhiteSpace(string: error)}
+    var isError: Bool { return !SttString.isWhiteSpace(string: error) }
+    
+    @objc dynamic var textEdges: UIEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8) {
+        didSet {
+            
+            label.frame = CGRect(x: textEdges.left, y: label.frame.origin.y, width: label.frame.width, height: label.frame.height)
+            
+            for litem in textsLeft {
+                litem.constant = textEdges.left
+            }
+            
+            for ritem in textsRight {
+                ritem.constant = textEdges.right
+            }
+        }
+    }
     
     var labelName: String? {
         get { return label.text }
         set { label.text = newValue }
     }
     
-    var isSimpleLabel: Bool = false {
+    @objc dynamic var isSimpleLabel: Bool = false {
         didSet {
             label.isHidden = isSimpleLabel
-            textField.placeholder = isSimpleLabel ? label.text : ""
+            _textField.placeholder = isSimpleLabel ? label.text : ""
         }
     }
     
     var typeInputBox: TypeInputBox = .text {
         didSet {
             changeType(type: typeInputBox)
+        }
+    }
+    
+    var text: String? {
+        get { return _textField.text }
+        set {
+            if !isEdited {
+                startEditing()
+            }
+            
+            _textField.text = newValue
         }
     }
     
@@ -68,30 +98,30 @@ class InputBox: UIView, SttViewable {
     }
     
     // MARK: Appereance
-    var textFieldFont: UIFont? {
-        get { return textField.font }
-        set { textField.font = newValue }
+    @objc dynamic var textFieldFont: UIFont? {
+        get { return _textField.font }
+        set { _textField.font = newValue }
     }
-    var labelFont: UIFont? {
+    @objc dynamic var labelFont: UIFont? {
         get { return label.font }
         set { label.font = newValue }
     }
-    var errorLabelFont: UIFont? {
+    @objc dynamic var errorLabelFont: UIFont? {
         get { return errorLabel.font }
         set { errorLabel.font = newValue }
     }
     
-    var textFieldColor: UIColor? {
-        get { return textField.textColor }
-        set { textField.textColor = newValue }
+    @objc dynamic var textFieldColor: UIColor? {
+        get { return _textField.textColor }
+        set { _textField.textColor = newValue }
     }
-    var errorColor: UIColor? {
+    @objc dynamic var errorColor: UIColor? {
         get { return errorLabel.textColor }
         set { errorLabel.textColor = newValue }
     }
     
-    var labelActiveColor: UIColor = .black
-    var labelDisableColor: UIColor = .black {
+    @objc dynamic var labelActiveColor: UIColor = .black
+    @objc dynamic var labelDisableColor: UIColor = .black {
         didSet {
             if !isError {
                 label.textColor = labelDisableColor
@@ -99,8 +129,8 @@ class InputBox: UIView, SttViewable {
         }
     }
     
-    var underlineActiveColor: UIColor = .black
-    var underlineDisableColor: UIColor = .black {
+    @objc dynamic var underlineActiveColor: UIColor = .black
+    @objc dynamic var underlineDisableColor: UIColor = .black {
         didSet {
             if !isError && !isEdited {
                 underline.backgroundColor = underlineDisableColor
@@ -108,14 +138,14 @@ class InputBox: UIView, SttViewable {
         }
     }
     
-    var underlineActiveHeight: CGFloat = 2 {
+    @objc dynamic var underlineActiveHeight: CGFloat = 2 {
         didSet {
             if isEdited {
                 cnstrUnderlineHeight.constant = underlineActiveHeight
             }
         }
     }
-    var underlineDisableHeight: CGFloat = 0.5 {
+    @objc dynamic var underlineDisableHeight: CGFloat = 0.5 {
         didSet {
             if !isEdited {
                 cnstrUnderlineHeight.constant = underlineDisableHeight
@@ -145,25 +175,27 @@ class InputBox: UIView, SttViewable {
     
     private func initTextField() {
         
-        textField = UITextField()
-        textField.borderStyle = .none
-        textField.textAlignment = .left
-        textField.autocorrectionType = .no
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.delegate = textFieldHandler
-        textField.clearButtonMode = .whileEditing
-        textField.height(40)
+        _textField = UITextField()
+        _textField.borderStyle = .none
+        _textField.textAlignment = .left
+        _textField.autocorrectionType = .no
+        _textField.translatesAutoresizingMaskIntoConstraints = false
+        _textField.delegate = textFieldHandler
+        _textField.clearButtonMode = .never
+        _textField.height(40)
 
-        addSubview(textField)
+        addSubview(_textField)
         
-        textField.edgesToSuperview(excluding: .bottom, insets: .top(20) + .left(8) + .right(8))
+        _textField.topToSuperview(offset: 20)
+        textsLeft.append(_textField.leftToSuperview(offset: textEdges.left))
+        textsRight.append(_textField.rightToSuperview(offset: textEdges.right))
         
         textFieldHandler.addTarget(type: .didStartEditing, delegate: self,
                                    handler: { (v, _) in v.startEditing() },
-                                   textField: textField)
+                                   textField: _textField)
         textFieldHandler.addTarget(type: .didEndEditing, delegate: self,
                                    handler: { (v, _) in v.endEditing() },
-                                   textField: textField)
+                                   textField: _textField)
         textFieldHandler.addTarget(type: .editing, delegate: self,
                                    handler: { (v, tf) in
                                     if !SttString.isEmpty(string: tf.text) {
@@ -172,10 +204,10 @@ class InputBox: UIView, SttViewable {
                                     if !tf.isEditing {
                                         v.endEditing()
                                     } },
-                                   textField: textField)
+                                   textField: _textField)
     }
     private func initLabel() {
-        label = UILabel(frame: CGRect(x: 8, y: 32, width: 300, height: 22))
+        label = UILabel(frame: CGRect(x: textEdges.left, y: 32, width: 300, height: 22))
         label.textAlignment = .left
         label.text = "Field"
         addSubview(label)
@@ -189,7 +221,7 @@ class InputBox: UIView, SttViewable {
         
         addSubview(underline)
         underline.edgesToSuperview(excluding: [.top, .bottom])
-        underline.topToBottom(of: textField, offset: 5)
+        underline.topToBottom(of: _textField, offset: 5)
     }
     private func initError() {
         errorLabel = UILabel()
@@ -202,7 +234,9 @@ class InputBox: UIView, SttViewable {
         
         addSubview(errorLabel)
         
-        errorLabel.edgesToSuperview(excluding: .top, insets: .bottom(3) + .left(8) + .right(8))
+        errorLabel.bottomToSuperview(offset: 3)
+        textsLeft.append(errorLabel.leftToSuperview(offset: textEdges.left))
+        textsRight.append(errorLabel.leftToSuperview(offset: textEdges.right))
         errorLabel.topToBottom(of: underline, offset: 2)
     }
     
@@ -243,7 +277,7 @@ class InputBox: UIView, SttViewable {
             underline.backgroundColor = underlineDisableColor
         }
         
-        if SttString.isWhiteSpace(string: textField.text) {
+        if SttString.isWhiteSpace(string: _textField.text) {
             UIView.animate(withDuration: 0.3) {
                 self.label.transform = CGAffineTransform.identity
             }
@@ -254,13 +288,13 @@ class InputBox: UIView, SttViewable {
     }
     
     private func changeType(type: TypeInputBox) {
-        textField.isSecureTextEntry = false
-        textField.isUserInteractionEnabled = true
+        _textField.isSecureTextEntry = false
+        _textField.isUserInteractionEnabled = true
         
         switch type {
         case .text: break;
         case .security:
-            textField.isSecureTextEntry = true
+            _textField.isSecureTextEntry = true
         }
     }
 }

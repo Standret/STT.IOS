@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 extension SttComand {
-    func useIndicator(button: UIButton, style: UIActivityIndicatorView.Style = .white) {
+    func useIndicator(button: UIButton, style: UIActivityIndicatorView.Style = .gray) {
         let indicator = button.setIndicator()
         indicator.color = UIColor.white
         indicator.style = style
@@ -18,7 +18,7 @@ extension SttComand {
         let title = button.titleLabel?.text
         let image = button.imageView?.image
         
-        self.addHandler(start: {
+        self.useWork(start: {
             button.setImage(nil, for: .normal)
             button.setTitle("", for: .disabled)
             button.isEnabled = false
@@ -26,13 +26,14 @@ extension SttComand {
         }) {
             button.setImage(image, for: .normal)
             button.setTitle(title, for: .disabled)
+            button.setNeedsDisplay()
             button.isEnabled = true
             indicator.stopAnimating()
         }
     }
     
     func useRefresh(refreshControl: UIRefreshControl) {
-        self.addHandler(start: nil) {
+        self.useWork(start: nil) {
             refreshControl.endRefreshing()
         }
     }

@@ -95,6 +95,12 @@ class SttTableViewSource<T: SttViewInjector>: NSObject, UITableViewDataSource, U
         return cell
     }
     
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.tableView(tableView, didSelectRowAt: indexPath, with: collection[indexPath.row])
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath, with presenter: T) { }
+    
     private var inPosition: Bool = false
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         

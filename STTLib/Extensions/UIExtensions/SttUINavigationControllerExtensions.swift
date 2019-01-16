@@ -21,7 +21,7 @@ extension UINavigationController {
         }
     }
     
-    func createTranparent() {
+    func createTransparent() {
         self.navigationBar.isTranslucent = true
         self.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationBar.shadowImage = UIImage()

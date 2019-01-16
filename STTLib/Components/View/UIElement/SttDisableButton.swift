@@ -11,23 +11,23 @@ import UIKit
 
 class SttDisableButton: UIButton {
     
-    var activeColor: UIColor? {
+    @objc dynamic var activeColor: UIColor? {
         didSet {
             if isEnabled {
                 backgroundColor = activeColor
             }
         }
     }
-    var disableColor: UIColor?
+    @objc dynamic  var disableColor: UIColor?
     
-    var activeTintColor: UIColor? {
+    @objc dynamic  var activeTintColor: UIColor? {
         didSet {
             if isEnabled {
                 tintColor = activeTintColor
             }
         }
     }
-    var disableTintColor: UIColor?
+    @objc dynamic var disableTintColor: UIColor?
     
     override var isEnabled: Bool {
         didSet {

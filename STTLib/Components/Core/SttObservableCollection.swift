@@ -13,7 +13,7 @@ enum NotifyCollectionType {
     case delete, insert, update, reload
 }
 
-class SttObservableCollection<T>: Collection {
+struct SttObservableCollection<T>: Collection {
     
     private var datas = [T]()
     private var notifyPublisher = PublishSubject<([Int], NotifyCollectionType)>()
@@ -28,29 +28,29 @@ class SttObservableCollection<T>: Collection {
         return datas.index(after: i)
     }
     
-    func append(_ newElement: T) {
+    mutating func append(_ newElement: T) {
         datas.append(newElement)
         notifyPublisher.onNext(([datas.count - 1], .insert))
     }
-    func append(contentsOf sequence: [T]) {
+    mutating func append(contentsOf sequence: [T]) {
         if sequence.count > 0 {
             let startIndex = datas.count
             datas.append(contentsOf: sequence)
             notifyPublisher.onNext((Array(startIndex...(datas.count - 1)), .insert))
         }
     }
-    func remove(at index: Int) {
+    mutating func remove(at index: Int) {
         datas.remove(at: index)
         notifyPublisher.onNext(([index], .delete))
     }
-    func insert(_ newElement: T, at index: Int) {
+    mutating func insert(_ newElement: T, at index: Int) {
         datas.insert(newElement, at: index)
         notifyPublisher.onNext(([index], .insert))
     }
     func index(where predicate: (T) throws -> Bool) rethrows -> Int? {
         return try datas.index(where: predicate)
     }
-    func removeAll() {
+    mutating func removeAll() {
         datas.removeAll()
         notifyPublisher.onNext(([], .reload))
     }
@@ -63,7 +63,7 @@ class SttObservableCollection<T>: Collection {
     
     subscript(index: Int) -> T {
         get { return datas[index] }
-        set(newValue) {
+        mutating set(newValue) {
             datas[index] = newValue
             notifyPublisher.onNext(([index], .update))
         }

@@ -36,27 +36,15 @@ class SttHandlerTextView: NSObject, UITextViewDelegate {
     // implements protocol
     
     func textViewDidBeginEditing(_ textView: UITextView) {
-        if let handlers = handlers[.didBeginEditing]  {
-            for del in handlers {
-                del(textView)
-            }
-        }
+        handlers[.didBeginEditing]?.forEach({ $0(textView) })
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
-        if let handlers = handlers[.didEndEditing]  {
-            for del in handlers {
-                del(textView)
-            }
-        }
+        handlers[.didEndEditing]?.forEach({ $0(textView) })
     }
     
     func textViewDidChange(_ textView: UITextView) {
-        if let handlers = handlers[.editing]  {
-            for del in handlers {
-                del(textView)
-            }
-        }
+        handlers[.editing]?.forEach({ $0(textView) })
     }
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {

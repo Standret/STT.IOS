@@ -14,5 +14,6 @@ enum TypeNavigation {
 }
 
 protocol SttStoryboardType {
-    func getName() -> String
+    var name: String { get }
 }
+

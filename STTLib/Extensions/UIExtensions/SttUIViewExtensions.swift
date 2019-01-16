@@ -8,9 +8,10 @@
 
 import Foundation
 import UIKit
+import TinyConstraints
 
 extension UIView {
-    func createCircle(dominateWidth: Bool = true, clipToBounds: Bool = true) {
+    func createCircle(dominateWidth: Bool = false, clipToBounds: Bool = true) {
         if dominateWidth {
             layer.cornerRadius = bounds.width / 2
         }
@@ -20,7 +21,7 @@ extension UIView {
         self.clipsToBounds = clipToBounds
     }
     
-    func setBorder(color: UIColor, size: Float) {
+    func setBorder(color: UIColor, size: Float = 1) {
         self.clipsToBounds = true
         self.layer.borderColor = color.cgColor
         self.layer.borderWidth = CGFloat(size)
@@ -39,7 +40,7 @@ extension UIView {
         indicator.style = style
         indicator.color = color
         
-        indicator.center = CGPoint(x: self.bounds.size.width / 2, y: self.bounds.size.height / 2)
+        indicator.centerInSuperview()
         self.addSubview(indicator)
         
         return indicator

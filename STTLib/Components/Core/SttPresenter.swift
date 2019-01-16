@@ -3,20 +3,22 @@
 //  SttDictionary
 //
 //  Created by Standret on 5/13/18.
+//  Updated to v2 on 1/12/19.
 //  Copyright © 2018 Standret. All rights reserved.
 //
 
 import Foundation
 import RxSwift
 
-protocol SttPresenterType: class {
+protocol SttPresenterType: AnyObject {
     func prepare(parametr: Any?)
 }
 
-class SttPresenter<TDelegate> : SttViewInjector, SttPresenterType {
+class SttPresenter<TDelegate> : SttViewControllerInjector {
     
     private weak var _delegate: SttViewable!
     private var _notificationError: SttNotificationErrorServiceType?
+    private var messageDisposable: Disposable?
     
     var delegate: TDelegate { return _delegate as! TDelegate }
     
@@ -27,14 +29,23 @@ class SttPresenter<TDelegate> : SttViewInjector, SttPresenterType {
     func injectView(delegate: SttViewable) {
         self._delegate = delegate
         
-        _ = _notificationError?.errorObservable
-            .observeInUI()
-            .subscribe(onNext: { [weak self] (err) in
-            if (self?._delegate is SttViewableListener) {
-                (self!._delegate as! SttViewableListener).sendError(error: err)
-            }
-        })
         viewDidInjected()
+    }
+    
+    func viewAppearing() { }
+    func viewAppeared() {
+        messageDisposable = _notificationError?.errorObservable
+            .observeInUI()
+            .subscribe(onNext: { [unowned self] (err) in
+                if (self._delegate is SttViewableListener) {
+                    (self._delegate as! SttViewableListener).sendError(error: err)
+                }
+            })
+    }
+    
+    func viewDissapearing() { }
+    func viewDissapeared() {
+        messageDisposable?.dispose()
     }
     
     func viewDidInjected() { }

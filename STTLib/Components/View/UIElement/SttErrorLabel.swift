@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 
 class SttErrorLabel: UIView {
+    
     private var errorLabel: UILabel!
     private var topContraint: NSLayoutConstraint!
     private var detailMessage: String?
@@ -34,17 +35,19 @@ class SttErrorLabel: UIView {
     }
     
     func showMessage(text: String, detailMessage: String?, isError: Bool = true) {
-        self.detailMessage = detailMessage
-        errorLabel.text = text
-        self.isHidden = false
-        self.backgroundColor = isError ? errorColor : messageColor
-        UIView.animate(withDuration: 0.5, animations: { [weak self] in self?.alpha = 1 })
-        Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { [weak self] (timer) in
-            timer.invalidate()
-            UIView.animate(withDuration: 0.5, animations: { [weak self] in self?.alpha = 0 })
-            Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] (timer) in
+        DispatchQueue.main.async {
+            self.detailMessage = detailMessage
+            self.errorLabel.text = text
+            self.isHidden = false
+            self.backgroundColor = isError ? self.errorColor : self.messageColor
+            UIView.animate(withDuration: 0.5, animations: { self.alpha = 1 })
+            Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { (timer) in
                 timer.invalidate()
-                self?.isHidden = true
+                UIView.animate(withDuration: 0.5, animations: { self.alpha = 0 })
+                Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { (timer) in
+                    timer.invalidate()
+                    self.isHidden = true
+                }
             }
         }
     }

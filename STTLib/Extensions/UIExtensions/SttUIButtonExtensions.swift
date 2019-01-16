@@ -11,8 +11,8 @@ import UIKit
 
 extension UIButton {
     
-    func setUnderlineTitle(title: String) {
-        self.setAttributedTitle(NSAttributedString(string: title, attributes: [
+    func setUnderlineTitle(title: String? = nil) {
+        self.setAttributedTitle(NSAttributedString(string: title ?? self.titleLabel!.text!, attributes: [
             .underlineStyle: NSUnderlineStyle.single.rawValue,
             .foregroundColor: self.titleColor(for: .normal)!,
             .font: UIFont(name: "HelveticaNeue-Medium", size: self.titleLabel!.font.pointSize)!

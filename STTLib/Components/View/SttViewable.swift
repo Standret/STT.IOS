@@ -9,15 +9,26 @@
 import Foundation
 import UIKit
 
-protocol SttViewable: class { }
 typealias SttViewControlable = SttViewableListener
+typealias SttViewControllerInjector = SttViewInjector & SttLifeCycleController & SttPresenterType
+
+protocol SttViewable: AnyObject { }
 
 protocol SttViewableListener: SttViewable {
     func sendMessage(title: String, message: String?)
     func sendError(error: SttBaseErrorType)
+    func sendError(title: String, description: String)
 }
 
 protocol SttViewInjector {
     func injectView(delegate: SttViewable)
-    func prepare(parametr: Any?)
+}
+
+protocol SttLifeCycleController {
+    
+    func viewAppeared()
+    func viewAppearing()
+    
+    func viewDissapeared()
+    func viewDissapearing()
 }

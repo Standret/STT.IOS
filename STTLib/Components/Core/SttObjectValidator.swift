@@ -116,7 +116,7 @@ class SttValidationObject {
             if SttString.isEmpty(string: object) {
                 if isRequired {
                     validationResult = .empty
-                    validationError = "\(name) is required."
+                    validationError = ""//"\(name) is required."
                 }
                 else {
                     validationResult = .ok

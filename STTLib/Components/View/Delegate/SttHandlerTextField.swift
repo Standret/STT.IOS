@@ -36,47 +36,23 @@ class SttHandlerTextField: NSObject, UITextFieldDelegate {
         }
     }
     
-    // implements protocol
+    @objc func changing(_ textField: UITextField) {
+        handlers[.editing]?.forEach({ $0(textField) })
+    }
+    
+    // implementation of protocol UITextFieldDelegate
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if let handlers = handlers[.shouldReturn]  {
-            for ihandler in handlers {
-                ihandler(textField)
-            }
-        }
-        return true
+        handlers[.shouldReturn]?.forEach({ $0(textField) })
+        return false
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
-        if let handlers = handlers[.didEndEditing]  {
-            for ihandler in handlers {
-                ihandler(textField)
-            }
-        }
+        handlers[.didEndEditing]?.forEach({ $0(textField) })
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        if let handlers = handlers[.didStartEditing]  {
-            for ihandler in handlers {
-                ihandler(textField)
-            }
-        }
-    }
-    
-    @objc func changing(_ textField: UITextField) {
-        if let handlers = handlers[.editing]  {
-            for ihandler in handlers {
-                ihandler(textField)
-            }
-        }
-    }
-    
-    override init () {
-        print ("init text handler")
-    }
-    
-    deinit {
-        print("Stt hnalder text filed deinit")
+        handlers[.didStartEditing]?.forEach({ $0(textField) })
     }
 }
 
