@@ -7,18 +7,68 @@
 //
 
 import Foundation
+import RxSwift
 import UIKit
 
 extension SttComand {
-    func useIndicator(button: UIButton, style: UIActivityIndicatorView.Style = .gray) {
+    func useIndicator(button: UIButton, style: UIActivityIndicatorView.Style = .gray) -> Disposable {
         let indicator = button.setIndicator()
         indicator.color = UIColor.white
         indicator.style = style
         
         let title = button.titleLabel?.text
-        let image = button.imageView?.image
+        var image: UIImage?
         
-        self.useWork(start: {
+        return self.useWork(start: {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            image = button.image(for: .normal)
+            button.setImage(nil, for: .normal)
+            button.setTitle("", for: .disabled)
+            button.isEnabled = false
+            indicator.startAnimating()
+        }) {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            button.setImage(image, for: .normal)
+            button.setTitle(title, for: .disabled)
+            button.setNeedsDisplay()
+            button.isEnabled = true
+            indicator.stopAnimating()
+        }
+    }
+    
+    func useIndicator(view:  UIView, style: UIActivityIndicatorView.Style = .gray) -> Disposable {
+        
+        let indicator = view.setIndicator()
+        indicator.color = UIColor.white
+        indicator.style = style
+        
+        return self.useWork(start: {
+            indicator.startAnimating()
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        }) {
+            indicator.stopAnimating()
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+        }
+    }
+    
+    func useRefresh(refreshControl: UIRefreshControl) -> Disposable {
+        return self.useWork(start: nil) {
+            refreshControl.endRefreshing()
+        }
+    }
+}
+
+extension SttComandWithParametr {
+    func useIndicator(button: UIButton, style: UIActivityIndicatorView.Style = .gray) -> Disposable {
+        let indicator = button.setIndicator()
+        indicator.color = UIColor.white
+        indicator.style = style
+        
+        let title = button.titleLabel?.text
+        var image: UIImage?
+        
+        return self.useWork(start: {
+            image = button.image(for: .normal)
             button.setImage(nil, for: .normal)
             button.setTitle("", for: .disabled)
             button.isEnabled = false
@@ -32,8 +82,21 @@ extension SttComand {
         }
     }
     
-    func useRefresh(refreshControl: UIRefreshControl) {
-        self.useWork(start: nil) {
+    func useIndicator(view:  UIView, style: UIActivityIndicatorView.Style = .gray) -> Disposable {
+        
+        let indicator = view.setIndicator()
+        indicator.color = UIColor.white
+        indicator.style = style
+      
+        return self.useWork(start: {
+            indicator.startAnimating()
+        }) {
+            indicator.stopAnimating()
+        }
+    }
+    
+    func useRefresh(refreshControl: UIRefreshControl) -> Disposable {
+        return self.useWork(start: nil) {
             refreshControl.endRefreshing()
         }
     }

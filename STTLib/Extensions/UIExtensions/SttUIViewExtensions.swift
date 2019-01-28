@@ -27,6 +27,10 @@ extension UIView {
         self.layer.borderWidth = CGFloat(size)
     }
     
+    func setBorder(named: String, size: Float = 1) {
+        self.setBorder(color: UIColor(named: named)!, size: size)
+    }
+    
     func setShadow(color: UIColor, size: CGSize = CGSize.zero, opacity: Float = 0.2, radius: Float = 1) {
         layer.shadowOffset = size
         layer.shadowColor = color.cgColor
@@ -40,8 +44,8 @@ extension UIView {
         indicator.style = style
         indicator.color = color
         
-        indicator.centerInSuperview()
         self.addSubview(indicator)
+        indicator.centerInSuperview()
         
         return indicator
     }
