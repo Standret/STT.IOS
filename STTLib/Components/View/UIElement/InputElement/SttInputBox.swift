@@ -117,7 +117,7 @@ class SttInputBox: UIView, SttViewable {
     
     @objc dynamic var textFieldColor: UIColor? {
         get { return _textField.textColor }
-        set { _textField.textColor = newValue }
+        set { if SttString.isEmpty(string: text) { _textField.textColor = newValue } }
     }
     @objc dynamic var errorColor: UIColor? {
         get { return errorLabel.textColor }
@@ -293,7 +293,7 @@ class SttInputBox: UIView, SttViewable {
             underline.backgroundColor = underlineDisableColor
         }
         
-        if SttString.isWhiteSpace(string: _textField.text) {
+        if SttString.isEmpty(string: _textField.text) {
             UIView.animate(withDuration: isAnimate ? 0.3 : 0) {
                 self.label.transform = CGAffineTransform.identity
             }

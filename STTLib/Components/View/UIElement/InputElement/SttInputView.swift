@@ -263,7 +263,7 @@ class SttInputView: UIView, SttViewable {
             underline.backgroundColor = underlineDisableColor
         }
         
-        if SttString.isWhiteSpace(string: textView.text) {
+        if SttString.isEmpty(string: textView.text) {
             UIView.animate(withDuration:  isAnimate ? 0.3 : 0) {
                 self.label.transform = CGAffineTransform.identity
             }
