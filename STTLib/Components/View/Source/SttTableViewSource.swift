@@ -30,6 +30,23 @@ class SttTableViewSource<T: SttViewInjector>: NSObject, UITableViewDataSource, U
     
     private var disposables: Disposable?
     
+    init(tableView: UITableView, cellIdentifiers: [SttIdentifiers], collection: SttObservableCollection<T>) {
+        
+        for item in cellIdentifiers {
+            if !item.isRegistered {
+                tableView.register(UINib(nibName: item.nibName ?? item.identifers, bundle: nil), forCellReuseIdentifier: item.identifers)
+            }
+        }
+        
+        _tableView = tableView
+        _cellIdentifiers.append(contentsOf: cellIdentifiers.map({ $0.identifers }))
+        
+        super.init()
+        tableView.dataSource = self
+        updateSource(collection: collection)
+        tableView.delegate = self
+    }
+    
     func updateSource(collection: SttObservableCollection<T>) {
         _collection = collection
         _tableView.reloadData()
@@ -59,23 +76,6 @@ class SttTableViewSource<T: SttViewInjector>: NSObject, UITableViewDataSource, U
                 callback(_delegate)
             }
         }
-    }
-    
-    init(tableView: UITableView, cellIdentifiers: [SttIdentifiers], collection: SttObservableCollection<T>) {
-        
-        for item in cellIdentifiers {
-            if !item.isRegistered {
-                tableView.register(UINib(nibName: item.nibName ?? item.identifers, bundle: nil), forCellReuseIdentifier: item.identifers)
-            }
-        }
-        
-        _tableView = tableView
-        _cellIdentifiers.append(contentsOf: cellIdentifiers.map({ $0.identifers }))
-        
-        super.init()
-        tableView.dataSource = self
-        updateSource(collection: collection)
-        tableView.delegate = self
     }
     
     // MARK: -- todo: write init for [cellIdentifiers]

@@ -107,7 +107,7 @@ class SttValidationObject {
     var max: Int = Int.max
     var customIncorrectError: String?
     
-    var validationResult: SttValidationResult = SttValidationResult.ok
+    var validationResult: SttValidationResult = SttValidationResult.empty
     var validationError: String = ""
     var isError: Bool { return validationResult != .ok }
     

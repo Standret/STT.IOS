@@ -20,7 +20,10 @@ class SttPresenter<TDelegate> : SttViewControllerInjector {
     private var _notificationError: SttNotificationErrorServiceType?
     private var messageDisposable: Disposable?
     
-    var delegate: TDelegate { return _delegate as! TDelegate }
+    var disposableBag = DisposeBag()
+    var listenerDisposableBag = DisposeBag()
+        
+    var delegate: TDelegate? { return _delegate as? TDelegate }
     
     init(notificationError: SttNotificationErrorServiceType?) {
         _notificationError = notificationError
@@ -51,6 +54,10 @@ class SttPresenter<TDelegate> : SttViewControllerInjector {
     func viewDidInjected() { }
     
     func prepare(parametr: Any?) { }
+    
+    func disposeAllSequence() {
+        disposableBag = DisposeBag()
+    }
 }
 
 class SttPresenterWithParametr<TDelegate, TParametr>: SttPresenter<TDelegate> {

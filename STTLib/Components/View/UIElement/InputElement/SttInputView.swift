@@ -26,14 +26,17 @@ class SttInputView: UIView, SttViewable {
     
     let handlerTextView = SttHandlerTextView()
     
+    var isAnimate: Bool = true
+    
     var isError: Bool { return !SttString.isWhiteSpace(string: error)}
     
+    @IBInspectable
     var labelName: String? {
         get { return label.text }
         set { label.text = newValue }
     }
     
-    var maxCount: Int = 70 {
+    @objc dynamic var maxCount: Int = 70 {
         didSet {
             handlerTextView.maxCharacter = maxCount
             changeCounterValue(to: 0)
@@ -58,38 +61,38 @@ class SttInputView: UIView, SttViewable {
     }
     
     // MARK: Appereance
-    var textFieldFont: UIFont? {
+    @objc dynamic var textFieldFont: UIFont? {
         get { return textView.font }
         set { textView.font = newValue }
     }
-    var labelFont: UIFont? {
+    @objc dynamic var labelFont: UIFont? {
         get { return label.font }
         set { label.font = newValue }
     }
-    var errorLabelFont: UIFont? {
+    @objc dynamic var errorLabelFont: UIFont? {
         get { return errorLabel.font }
         set { errorLabel.font = newValue }
     }
-    var counterLabelFont: UIFont? {
+    @objc dynamic var counterLabelFont: UIFont? {
         get { return counterLabel.font }
         set { counterLabel.font = newValue }
     }
     
-    var textFieldColor: UIColor? {
+    @objc dynamic var textFieldColor: UIColor? {
         get { return textView.textColor }
         set { textView.textColor = newValue }
     }
-    var errorColor: UIColor? {
+    @objc dynamic var errorColor: UIColor? {
         get { return errorLabel.textColor }
         set { errorLabel.textColor = newValue }
     }
-    var counterColor: UIColor? {
+    @objc dynamic var counterColor: UIColor? {
         get { return counterLabel.textColor }
         set { counterLabel.textColor = newValue }
     }
     
-    var labelActiveColor: UIColor = .black
-    var labelDisableColor: UIColor = .black {
+    @objc dynamic var labelActiveColor: UIColor = .black
+    @objc dynamic var labelDisableColor: UIColor = .black {
         didSet {
             if !isError {
                 label.textColor = labelDisableColor
@@ -97,8 +100,8 @@ class SttInputView: UIView, SttViewable {
         }
     }
     
-    var underlineActiveColor: UIColor = .black
-    var underlineDisableColor: UIColor = .black {
+    @objc dynamic var underlineActiveColor: UIColor = .black
+    @objc dynamic var underlineDisableColor: UIColor = .black {
         didSet {
             if !isError && !isEdited {
                 underline.backgroundColor = underlineDisableColor
@@ -106,14 +109,14 @@ class SttInputView: UIView, SttViewable {
         }
     }
     
-    var underlineActiveHeight: CGFloat = 2 {
+    @objc dynamic var underlineActiveHeight: CGFloat = 2 {
         didSet {
             if isEdited {
                 cnstrUnderlineHeight.constant = underlineActiveHeight
             }
         }
     }
-    var underlineDisableHeight: CGFloat = 0.5 {
+    @objc dynamic var underlineDisableHeight: CGFloat = 0.5 {
         didSet {
             if !isEdited {
                 cnstrUnderlineHeight.constant = underlineDisableHeight
@@ -133,6 +136,10 @@ class SttInputView: UIView, SttViewable {
         viewDidLoad()
     }
     
+    override func becomeFirstResponder() -> Bool {
+        return textView.becomeFirstResponder()
+    }
+    
     private func viewDidLoad() {
         
         initTextView()
@@ -149,10 +156,11 @@ class SttInputView: UIView, SttViewable {
         textView.translatesAutoresizingMaskIntoConstraints = false
         textView.isScrollEnabled = false
         textView.delegate = handlerTextView
+        textView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         
         addSubview(textView)
         
-        textView.edgesToSuperview(excluding: .bottom, insets: .top(20) + .left(8) + .right(8))
+        textView.edgesToSuperview(excluding: .bottom, insets: .top(20) + .left(4) + .right(4))
         
         handlerTextView.addTarget(type: .didBeginEditing, delegate: self,
                                   handler: { (v, _) in v.startEditing() },
@@ -229,7 +237,7 @@ class SttInputView: UIView, SttViewable {
             underline.backgroundColor = underlineActiveColor
         }
         
-        UIView.animate(withDuration: 0.3, animations: {
+        UIView.animate(withDuration: isAnimate ? 0.3 : 0, animations: {
             
             let trans  = -(self.label.bounds.width - self.label.bounds.width * 0.65) / 2
             let translation = CGAffineTransform(translationX: trans, y: -32)
@@ -256,13 +264,13 @@ class SttInputView: UIView, SttViewable {
         }
         
         if SttString.isWhiteSpace(string: textView.text) {
-            UIView.animate(withDuration: 0.3) {
+            UIView.animate(withDuration:  isAnimate ? 0.3 : 0) {
                 self.label.transform = CGAffineTransform.identity
             }
         }
         
         cnstrUnderlineHeight.constant = underlineDisableHeight
-        UIView.animate(withDuration: 0.3, animations: { self.layoutIfNeeded() })
+        UIView.animate(withDuration:  isAnimate ? 0.3 : 0, animations: { self.layoutIfNeeded() })
     }
     
     private func changeCounterValue(to with: Int) {

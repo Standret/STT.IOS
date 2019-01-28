@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-class SttDisableButton: UIButton {
+class SttDisableButton: SttButton {
     
     @objc dynamic var activeColor: UIColor? {
         didSet {
@@ -18,7 +18,13 @@ class SttDisableButton: UIButton {
             }
         }
     }
-    @objc dynamic  var disableColor: UIColor?
+    @objc dynamic  var disableColor: UIColor? {
+        didSet {
+            if !isEnabled {
+                backgroundColor = disableColor
+            }
+        }
+    }
     
     @objc dynamic  var activeTintColor: UIColor? {
         didSet {
@@ -27,7 +33,13 @@ class SttDisableButton: UIButton {
             }
         }
     }
-    @objc dynamic var disableTintColor: UIColor?
+    @objc dynamic var disableTintColor: UIColor? {
+        didSet {
+            if !isEnabled {
+                tintColor = disableTintColor
+            }
+        }
+    }
     
     override var isEnabled: Bool {
         didSet {

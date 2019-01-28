@@ -34,6 +34,9 @@ class SttInputBox: UIView, SttViewable {
     private var cnstrUnderlineHeight: NSLayoutConstraint!
     private var cnstrErrorHeight: NSLayoutConstraint!
     
+    /// disable or enable all start and end editing animation
+    var isAnimate: Bool = true
+    
     var isError: Bool { return !SttString.isWhiteSpace(string: error) }
     
     @objc dynamic var textEdges: UIEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8) {
@@ -51,6 +54,7 @@ class SttInputBox: UIView, SttViewable {
         }
     }
     
+    @IBInspectable
     var labelName: String? {
         get { return label.text }
         set { label.text = newValue }
@@ -165,6 +169,17 @@ class SttInputBox: UIView, SttViewable {
         viewDidLoad()
     }
     
+    override func becomeFirstResponder() -> Bool {
+        return textField.becomeFirstResponder()
+    }
+    
+    func setAttributedString(string: NSAttributedString) {
+        textField.attributedText = string
+        if !SttString.isEmpty(string: text) {
+            startEditing()
+        }
+    }
+    
     private func viewDidLoad() {
         
         initTextField()
@@ -179,6 +194,7 @@ class SttInputBox: UIView, SttViewable {
         _textField.borderStyle = .none
         _textField.textAlignment = .left
         _textField.autocorrectionType = .no
+        _textField.autocapitalizationType = .none
         _textField.translatesAutoresizingMaskIntoConstraints = false
         _textField.delegate = textFieldHandler
         _textField.clearButtonMode = .never
@@ -251,7 +267,7 @@ class SttInputBox: UIView, SttViewable {
             underline.backgroundColor = underlineActiveColor
         }
         
-        UIView.animate(withDuration: 0.3, animations: {
+        UIView.animate(withDuration: isAnimate ? 0.3 : 0, animations: {
             
             let trans  = -(self.label.bounds.width - self.label.bounds.width * 0.65) / 2
             let translation = CGAffineTransform(translationX: trans, y: -32)
@@ -278,13 +294,13 @@ class SttInputBox: UIView, SttViewable {
         }
         
         if SttString.isWhiteSpace(string: _textField.text) {
-            UIView.animate(withDuration: 0.3) {
+            UIView.animate(withDuration: isAnimate ? 0.3 : 0) {
                 self.label.transform = CGAffineTransform.identity
             }
         }
         
         cnstrUnderlineHeight.constant = underlineDisableHeight
-        UIView.animate(withDuration: 0.3, animations: { self.layoutIfNeeded() })
+        UIView.animate(withDuration: isAnimate ? 0.3 : 0, animations: { self.layoutIfNeeded() })
     }
     
     private func changeType(type: TypeInputBox) {

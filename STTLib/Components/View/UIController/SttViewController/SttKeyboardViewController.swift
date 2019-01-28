@@ -14,6 +14,7 @@ class SttKeyboardViewController<T: SttViewControllerInjector>: SttViewController
     
     var isKeyboardShow: Bool { return _isKeyboardShow }
     var useCancelGesture = true
+    var cancelsTouchesInView = true
     
     let keyboardNotification = SttKeyboardNotification()
     fileprivate var scrollAmount: CGFloat = 0
@@ -32,7 +33,7 @@ class SttKeyboardViewController<T: SttViewControllerInjector>: SttViewController
         
         if useCancelGesture {
             let cancelGesture = UITapGestureRecognizer(target: self, action: #selector(handleClick(_:)))
-            cancelGesture.cancelsTouchesInView = false
+            cancelGesture.cancelsTouchesInView = cancelsTouchesInView
             view.addGestureRecognizer(cancelGesture)
         }
         

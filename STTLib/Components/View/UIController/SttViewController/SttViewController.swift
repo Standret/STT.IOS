@@ -26,17 +26,17 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
     var customBackBarButton: Bool = false
     
     var viewError: SttErrorLabel!
-    var barStyle = UIStatusBarStyle.lightContent
+    var barStyle = UIStatusBarStyle.default
     
     fileprivate var parametr: Any?
     fileprivate var callback: ((Any) -> Void)?
     
-    fileprivate var wrappedView: UIView!
+    private var _wrappedView = SttWalIndicatorView()
+    var wrappedView: SttWalIndicatorView { return _wrappedView }
     
     override func viewDidLoad() {
         super.viewDidLoad()
                 
-        wrappedView = UIView()
         wrappedView.backgroundColor = .clear
         wrappedView.isHidden = true
         
@@ -54,9 +54,17 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
         navigationItem.backBarButtonItem = item
     }
     
-    func manageWrappedView(color: UIColor, hide: Bool) {
+    func manageWrappedView(color: UIColor, hide: Bool, useIndicator: Bool = true) {
         wrappedView.backgroundColor = color
         wrappedView.isHidden = hide
+        if useIndicator {
+            if hide {
+                wrappedView.stopAnimating()
+            }
+            else {
+                wrappedView.startAnimating()
+            }
+        }
     }
     
     fileprivate var isFirstStart = true
@@ -77,6 +85,7 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
         navigationController?.setNavigationBarHidden(hideNavigationBar, animated: true)
         navigationController?.navigationBar.isHidden = hideNavigationBar
     }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         presenter.viewAppeared()

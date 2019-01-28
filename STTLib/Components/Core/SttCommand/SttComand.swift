@@ -59,7 +59,7 @@ class SttComand {
         })
     }
     
-    func useWord(handler: @escaping (Bool) -> Void) -> Disposable {
+    func useWork(handler: @escaping (Bool) -> Void) -> Disposable {
         return eventSubject.subscribe(onNext: handler)
     }
     
@@ -92,6 +92,11 @@ class SttComand {
                 self.isCalling = false
             }
         }, onCompleted: {
+            if self.isCalling {
+                self.eventSubject.onNext(false)
+                self.isCalling = false
+            }
+        }, onDispose: {
             if self.isCalling {
                 self.eventSubject.onNext(false)
                 self.isCalling = false
@@ -183,6 +188,16 @@ class SttComandWithParametr<TParametr> {
                 self.isCalling = false
             }
         }, onCompleted: {
+            if self.isCalling {
+                self.eventSubject.onNext(false)
+                self.isCalling = false
+            }
+        }, onSubscribed: {
+            if !self.isCalling {
+                self.eventSubject.onNext(true)
+                self.isCalling = true
+            }
+        }, onDispose: {
             if self.isCalling {
                 self.eventSubject.onNext(false)
                 self.isCalling = false

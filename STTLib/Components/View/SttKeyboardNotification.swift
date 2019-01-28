@@ -16,7 +16,7 @@ public protocol SttKeyboardNotificationDelegate: class {
 
 public class SttKeyboardNotification {
     
-    public var isAnimation: Bool = false
+    public var isAnimation: Bool = true
     public var callIfKeyboardIsShow: Bool = false
     
     public var isActive: Bool = false
