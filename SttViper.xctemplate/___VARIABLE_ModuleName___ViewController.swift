@@ -10,5 +10,5 @@ class ___VARIABLE_ModuleName___ViewController: SttViewController<___VARIABLE_Mod
 
 	}
 
-    // MARK: implementation of ___VARIABLE_ModuleName___ViewDelegate
+	// MARK: - implementation of ___VARIABLE_ModuleName___ViewDelegate
 }
