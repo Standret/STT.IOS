@@ -41,6 +41,7 @@ class SttStorage<T: Codable>: SttStorageType {
         }
     }
     
+    @discardableResult
     func put(item: T) -> Bool {
         switch type {
         case .security:
@@ -51,6 +52,7 @@ class SttStorage<T: Codable>: SttStorageType {
         }
     }
     
+    @discardableResult
     func drop() -> Bool {
         switch type {
         case .security:

@@ -8,12 +8,9 @@
 
 import Foundation
 
-class DateConverter: SttConverterType {
+class DateConverter: SttConverter<Date, String> {
     
-    typealias TIn = Date
-    typealias TOut = String
-    
-    func convert(value: Date, parametr: Any?) -> String {
+    override func convert(value: Date, parametr: Any?) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale.current
         formatter.timeZone = TimeZone.current
