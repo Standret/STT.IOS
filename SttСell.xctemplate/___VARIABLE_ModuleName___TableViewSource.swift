@@ -1,7 +1,7 @@
 //___FILEHEADER___
 
 import Foundation
-Import UIKit
+import UIKit
 
 final class ___VARIABLE_ModuleName___TableViewSource: SttTableViewSource<___VARIABLE_ModuleName___TableViewCellPresenter> {
     

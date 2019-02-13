@@ -8,6 +8,6 @@ final class ___VARIABLE_ModuleName___TableViewCellPresenter: SttPresenter<___VAR
     
     init() {
         
-        super.injectView(notificationError: nil)
+        super.init(notificationError: nil)
     }
 }
