@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-enum TypeActionTextField {
+enum SttTypeActionTextField {
     case shouldReturn
     case didEndEditing, didStartEditing
     case editing
@@ -18,41 +18,37 @@ enum TypeActionTextField {
 class SttHandlerTextField: NSObject, UITextFieldDelegate {
     
     // private property
-    private var handlers = [TypeActionTextField: [(UITextField) -> Void]]()
+    private var handlers = [SttTypeActionTextField: [SttDelegatedCall<UITextField>]]()
     
     // method for add target
     
-    func addTarget<T: SttViewable>(type: TypeActionTextField, delegate: T, handler: @escaping (T, UITextField) -> Void, textField: UITextField) {
+    func addTarget<T: AnyObject>(type: SttTypeActionTextField, delegate: T, handler: @escaping (T, UITextField) -> Void, textField: UITextField? = nil) {
         switch type {
         case .editing:
-            textField.addTarget(self, action: #selector(changing), for: .editingChanged)
+            textField!.addTarget(self, action: #selector(changing), for: .editingChanged)
         default: break
         }
-        handlers[type] = handlers[type] ?? [(UITextField) -> Void]()
-        handlers[type]!.append { [weak delegate] tf in
-            if let _delegate = delegate {
-                handler(_delegate, tf)
-            }
-        }
+        handlers[type] = handlers[type] ?? [SttDelegatedCall<UITextField>]()
+        handlers[type]!.append(SttDelegatedCall<UITextField>(to: delegate, with: handler))
     }
     
     @objc func changing(_ textField: UITextField) {
-        handlers[.editing]?.forEach({ $0(textField) })
+        handlers[.editing]?.forEach({ $0.callback(textField) })
     }
     
     // implementation of protocol UITextFieldDelegate
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        handlers[.shouldReturn]?.forEach({ $0(textField) })
+        handlers[.shouldReturn]?.forEach({ $0.callback(textField) })
         return false
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
-        handlers[.didEndEditing]?.forEach({ $0(textField) })
+        handlers[.didEndEditing]?.forEach({ $0.callback(textField) })
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        handlers[.didStartEditing]?.forEach({ $0(textField) })
+        handlers[.didStartEditing]?.forEach({ $0.callback(textField) })
     }
 }
 

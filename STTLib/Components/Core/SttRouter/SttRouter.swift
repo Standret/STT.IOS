@@ -25,6 +25,10 @@ extension SttRouterType {
         self.navigateWithId(storyboard: storyboard, to: T.self, parametr: parametr, typeNavigation: typeNavigation, animate: animate)
     }
     
+    func navigateWithId(storyboard: SttStoryboardType, to name: String, parametr: Any? = nil, typeNavigation: TypeNavigation = .push, animate: Bool = true) {
+        self.navigateWithId(storyboard: storyboard, to: name, parametr: parametr, typeNavigation: typeNavigation, animate: animate)
+    }
+    
     func close(animate: Bool = true) {
         self.close(animate: animate)
     }
@@ -65,7 +69,7 @@ class SttRouter: SttRouterType {
                                       to: SttPresenterType.self)
                 .to(preferred: getTypeNavigation(type: typeNavigation))
                 .transition(animate: animate)
-                .perform()
+                .then({ $0.prepare(parametr: parametr) })
         }
     }
     
@@ -77,11 +81,32 @@ class SttRouter: SttRouterType {
                                to: SttPresenterType.self)
                 .to(preferred: getTypeNavigation(type: typeNavigation))
                 .transition(animate: animate)
-                .perform()
+                .then({ $0.prepare(parametr: parametr) })
+        }
+    }
+    
+    func navigateWithId(storyboard: SttStoryboardType, to name: String, parametr: Any? = nil, typeNavigation: TypeNavigation = .push, animate: Bool = true) {
+        
+        executer {
+            try transitionHandler
+                .forStoryboard(factory: getTarfetStoryboardFactory(storyboard: storyboard, to: name),
+                               to: SttPresenterType.self)
+                .to(preferred: getTypeNavigation(type: typeNavigation))
+                .transition(animate: animate)
+                .then({ $0.prepare(parametr: parametr) })
         }
     }
     
     func close(animate: Bool = true) {
+        executer {
+            try transitionHandler
+                .closeCurrentModule()
+                .transition(animate: animate)
+                .perform()
+        }
+    }
+    
+    func forceClose(animate: Bool = true) {
         executer {
             try transitionHandler
                 .closeCurrentModule()
@@ -106,6 +131,12 @@ class SttRouter: SttRouterType {
         
         let storyboard = UIStoryboard(name: storyboard.name, bundle: Bundle.main)
         return StoryboardFactory(storyboard: storyboard, restorationId: targetname)
+    }
+    
+    internal func getTarfetStoryboardFactory(storyboard: SttStoryboardType, to name: String) -> StoryboardFactory {
+        
+        let storyboard = UIStoryboard(name: storyboard.name, bundle: Bundle.main)
+        return StoryboardFactory(storyboard: storyboard, restorationId: name)
     }
     
     internal func getTargetVCId<T: SttPresenterType>(to _: T.Type) -> String {

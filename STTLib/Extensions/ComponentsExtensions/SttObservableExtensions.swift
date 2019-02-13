@@ -34,9 +34,9 @@ extension Observable {
     {
         return self.map({ (element) -> Element in
             _ = saveCallback(element).subscribe(onCompleted: {
-                SttLog.trace(message: "\(type(of: Element.self)) has been saved succefully in realm", key: Constants.repositoryExtensionsLog)
+                SttLog.trace(message: "\(type(of: Element.self)) has been saved succefully in realm", key: "RepositoryExtension")
             }, onError: { (error) in
-                SttLog.error(message: "\(type(of: Element.self)) could not save in db", key: Constants.repositoryExtensionsLog)
+                SttLog.error(message: "\(type(of: Element.self)) could not save in db", key: "RepositoryExtension")
             })
             return element
         })
@@ -44,6 +44,10 @@ extension Observable {
     
     func toBoolObservable() -> Observable<Bool> {
         return self.map({ _ in true })
+    }
+    
+    func toVoidObservable() -> Observable<Void> {
+        return self.map({ _ in () })
     }
     
     func inBackground() -> Observable<Element> {

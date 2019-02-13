@@ -23,7 +23,7 @@ class SttTableViewSource<T: SttViewInjector>: NSObject, UITableViewDataSource, U
     var cellIdentifiers: [String] { return _cellIdentifiers }
     
     var useAnimation: Bool = false
-    var maxAnimationCount = 2
+    var maxAnimationCount = 1
     
     private var _collection: SttObservableCollection<T>!
     var collection: SttObservableCollection<T> { return _collection }
@@ -60,11 +60,14 @@ class SttTableViewSource<T: SttViewInjector>: NSObject, UITableViewDataSource, U
                 case .reload:
                     self?._tableView.reloadData()
                 case .delete:
-                    self?._tableView.deleteRows(at: indexes.map({ IndexPath(row: $0, section: 0) }), with: self!.useAnimation ? .left : .none)
+                    self?._tableView.deleteRows(at: indexes.map({ IndexPath(row: $0, section: 0) }),
+                                                with: self!.useAnimation ? .left : .none)
                 case .insert:
-                    self?._tableView.insertRows(at: indexes.map({ IndexPath(row: $0, section: 0) }), with: self!.useAnimation ? .middle : .none)
+                    self?._tableView.insertRows(at: indexes.map({ IndexPath(row: $0, section: 0) }),
+                                                with: self!.useAnimation ? .middle : .none)
                 case .update:
-                    self?._tableView.reloadRows(at: indexes.map({ IndexPath(row: $0, section: 0) }), with: self!.useAnimation ? .fade : .none)
+                    self?._tableView.reloadRows(at: indexes.map({ IndexPath(row: $0, section: 0) }),
+                                                with: self!.useAnimation ? .fade : .none)
                 }
             }
         })

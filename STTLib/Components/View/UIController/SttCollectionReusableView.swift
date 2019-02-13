@@ -9,11 +9,11 @@
 import Foundation
 import UIKit
 
-class SttTCollectionReusableView<T: SttViewInjector>: UICollectionReusableView, SttViewable {
+class SttCollectionReusableView<T: SttViewInjector>: UICollectionReusableView, SttViewable {
     
-    var dataContext: T!
+    var presenter: T!
     
     func prepareBind() {
-        //dataContext.injectView(delegate: self)
+        presenter.injectView(delegate: self)
     }
 }

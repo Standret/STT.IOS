@@ -8,25 +8,44 @@
 
 import Foundation
 
-protocol SttConverterType {
-    associatedtype TIn
-    associatedtype TOut
+protocol SttConverterType: AnyObject {
+
+    init()
     
-    func convert(value: TIn, parametr: Any?) -> TOut
+    func convert(value: Any?, parametr: Any?) -> Any
+    func convertBack(value: Any?, parametr: Any?) -> Any
 }
 
-extension SttConverterType {
+class SttConverter<TIn, TOut>: SttConverterType {
+    
+    required init() { }
+    
+    func convert(value: Any?, parametr: Any?) -> Any {
+        return self.convert(value: value as! TIn, parametr: parametr)
+    }
+    
+    func convertBack(value: Any?, parametr: Any?) -> Any {
+        return self.convertBack(value: value as! TOut, parametr: parametr)
+    }
+    
+    func convert(value: TIn, parametr: Any?) -> TOut {
+        notImplementException()
+    }
+    
+    func convertBack(value: TOut, parametr: Any?) -> TIn {
+        notImplementException()
+    }
+}
+
+extension SttConverter {
     func convert(value: TIn) -> TOut {
         return self.convert(value: value, parametr: nil)
     }
 }
 
-class SttLogDateConverter: SttConverterType {
-    
-    typealias TIn = Date
-    typealias TOut = String
-    
-    func convert(value: Date, parametr: Any?) -> String {
+class SttLogDateConverter: SttConverter<Date, String> {
+
+    override func convert(value: Date, parametr: Any?) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale.current
         formatter.timeZone = TimeZone.current

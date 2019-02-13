@@ -16,6 +16,13 @@ extension String: ParameterEncoding {
         request.httpBody = data(using: .utf8, allowLossyConversion: false)
         return request
     }
+    
+    func isAlpha() -> Bool {
+        if let character = self.unicodeScalars.first {
+            return CharacterSet.letters.contains(character)
+        }
+        return false
+    }
 }
 
 class SttString {

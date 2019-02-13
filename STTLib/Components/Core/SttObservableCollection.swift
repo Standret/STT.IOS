@@ -51,8 +51,10 @@ class SttObservableCollection<T>: Collection {
         return try datas.index(where: predicate)
     }
     func removeAll() {
-        datas.removeAll()
-        notifyPublisher.onNext(([], .reload))
+        if datas.count > 0 {
+            datas.removeAll()
+            notifyPublisher.onNext(([], .reload))
+        }
     }
     func lastOrNil() -> T? {
         return datas.last

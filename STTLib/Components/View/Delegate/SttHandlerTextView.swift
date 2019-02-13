@@ -17,7 +17,7 @@ enum TypeActionTextView {
 class SttHandlerTextView: NSObject, UITextViewDelegate {
     
     // private property
-    private var handlers = [TypeActionTextView: [(UITextView) -> Void]]()
+    private var handlers = [TypeActionTextView: [SttDelegatedCall<UITextView>]]()
     
     public var maxCharacter: Int = Int.max
     
@@ -25,26 +25,22 @@ class SttHandlerTextView: NSObject, UITextViewDelegate {
     
     func addTarget<T: SttViewable>(type: TypeActionTextView, delegate: T, handler: @escaping (T, UITextView) -> Void, textField: UITextView) {
         
-        handlers[type] = handlers[type] ?? [(UITextView) -> Void]()
-        handlers[type]?.append({ [weak delegate] tf in
-            if let _delegate = delegate {
-                handler(_delegate, tf)
-            }
-        })
+        handlers[type] = handlers[type] ?? [SttDelegatedCall<UITextView>]()
+        handlers[type]?.append(SttDelegatedCall<UITextView>(to: delegate, with: handler))
     }
     
     // implements protocol
     
     func textViewDidBeginEditing(_ textView: UITextView) {
-        handlers[.didBeginEditing]?.forEach({ $0(textView) })
+        handlers[.didBeginEditing]?.forEach({ $0.callback(textView) })
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
-        handlers[.didEndEditing]?.forEach({ $0(textView) })
+        handlers[.didEndEditing]?.forEach({ $0.callback(textView) })
     }
     
     func textViewDidChange(_ textView: UITextView) {
-        handlers[.editing]?.forEach({ $0(textView) })
+        handlers[.editing]?.forEach({ $0.callback(textView) })
     }
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {

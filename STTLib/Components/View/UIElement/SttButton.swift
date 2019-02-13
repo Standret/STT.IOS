@@ -16,3 +16,34 @@ class SttButton: UIButton {
         set { titleLabel!.font = newValue }
     }
 }
+
+class SttHiglightedButton: SttButton {
+    
+    @objc dynamic var unSelectedBackground: UIColor? {
+        didSet {
+            if !isHighlighted {
+                self.backgroundColor = unSelectedBackground
+            }
+        }
+    }
+    
+    @objc dynamic var selectedBackground: UIColor? {
+        didSet {
+            if isHighlighted {
+                self.backgroundColor = selectedBackground
+            }
+        }
+    }
+    
+    override var isSelected: Bool {
+        didSet {
+            if isSelected {
+                self.backgroundColor = selectedBackground
+            }
+            else {
+                self.backgroundColor = unSelectedBackground
+            }
+            self.setNeedsDisplay()
+        }
+    }
+}

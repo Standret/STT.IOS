@@ -31,6 +31,7 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
     fileprivate var parametr: Any?
     fileprivate var callback: ((Any) -> Void)?
     
+    private var backgroundLayer: UIView!
     private var _wrappedView = SttWalIndicatorView()
     var wrappedView: SttWalIndicatorView { return _wrappedView }
     
@@ -43,6 +44,13 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
         view.addSubview(wrappedView)
         wrappedView.edgesToSuperview()
         
+        backgroundLayer = UIView()
+        backgroundLayer.translatesAutoresizingMaskIntoConstraints = false
+        backgroundLayer.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)
+        backgroundLayer.alpha = 0
+        view.addSubview(backgroundLayer)
+        backgroundLayer.edgesToSuperview()
+        
         viewError = SttErrorLabel()
         viewError.errorColor = UIColor(red:0.98, green:0.26, blue:0.26, alpha:1)
         viewError.messageColor = UIColor(red: 0.251, green: 0.482, blue: 0.316, alpha:1)
@@ -52,6 +60,35 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
         let item = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
         navigationItem.hidesBackButton = customBackBarButton
         navigationItem.backBarButtonItem = item
+        
+        navigationController?.interactivePopGestureRecognizer?.addTarget(self, action: #selector(onGesture(sender:)))
+    }
+    
+    private var currentTransitionCoordinator: UIViewControllerTransitionCoordinator?
+    private var isAppeared: Bool = false
+    @objc private func onGesture(sender: UIGestureRecognizer) {
+        switch sender.state {
+        case .began, .changed:
+            if let ct = navigationController?.transitionCoordinator {
+                currentTransitionCoordinator = ct
+            }
+        case .cancelled, .ended:
+            currentTransitionCoordinator = nil
+            backgroundLayer.alpha = 0
+        case .possible, .failed:
+            break
+        }
+        
+        if let currentTransitionCoordinator = currentTransitionCoordinator {
+            print(currentTransitionCoordinator.percentComplete)
+            if isAppeared {
+                backgroundLayer.alpha = 1 - currentTransitionCoordinator.percentComplete
+            }
+            else {
+                backgroundLayer.alpha = 0
+            }
+        }
+        
     }
     
     func manageWrappedView(color: UIColor, hide: Bool, useIndicator: Bool = true) {
@@ -69,12 +106,14 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
     
     fileprivate var isFirstStart = true
     override func viewWillAppear(_ animated: Bool) {
+        isAppeared = true
         super.viewWillAppear(animated)
         self.presenter.viewAppearing()
-                
+        
         if isFirstStart {
             isFirstStart = false
             style()
+            bind()
         }
         
         UIApplication.shared.statusBarStyle = barStyle
@@ -92,6 +131,7 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
+        isAppeared = false
         super.viewWillDisappear(animated)
         presenter.viewDissapearing()
         
@@ -106,4 +146,7 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
     
     /// Use this function for decorate elements
     func style() { }
+    
+    /// Use this function for subscribing on notification
+    func bind() { }
 }

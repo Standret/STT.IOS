@@ -9,11 +9,33 @@
 import Foundation
 import RxSwift
 
-class SttComand {
+protocol SttCommandType {
     
+    var observableCanNext: Observable<Bool> { get }
+    
+    func execute(parametr: Any?)
+    func canExecute(parametr: Any?) -> Bool
+    
+    func raiseCanExecute(parametr: Any?)
+
+    func useWork(start: (() -> Void)?, end: (() -> Void)?) -> Disposable
+    func useWork(handler: @escaping (Bool) -> Void) -> Disposable
+}
+
+extension SttCommandType {
+    func raiseCanExecute(parametr: Any? = nil) {
+        self.raiseCanExecute(parametr: parametr)
+    }
+}
+
+class SttCommand: SttCommandType {
+    
+    private var canNextSubject = PublishSubject<Bool>()
     private var eventSubject = PublishSubject<Bool>()
     private var executeHandler: (() -> Void)
     private var canExecuteHandler: (() -> Bool)?
+    
+    var observableCanNext: Observable<Bool> { return canNextSubject }
     
     private var isCalling = false
     
@@ -45,7 +67,33 @@ class SttComand {
         SttLog.trace(message: "Disposed", key: "SttCommand")
         eventSubject.dispose()
     }
-
+    
+    func execute(parametr: Any?) {
+        self.execute()
+    }
+    func canExecute(parametr: Any?) -> Bool {
+        return self.canExecute()
+    }
+    
+    func raiseCanExecute(parametr: Any?) {
+        canNextSubject.onNext(canExecute())
+    }
+    
+    func execute() {
+        if canExecute() {
+            executeHandler()
+        }
+        else {
+            SttLog.trace(message: "Command could not be execute. Can execute return: \(canExecute())", key: "SttComand")
+        }
+    }
+    func canExecute() -> Bool {
+        if let handler = canExecuteHandler {
+            return handler()
+        }
+        return true
+    }
+    
     // TODO: Probably needed add call end on disposed
     func useWork(start: (() -> Void)?, end: (() -> Void)?) -> Disposable {
         
@@ -58,26 +106,8 @@ class SttComand {
             }
         })
     }
-    
     func useWork(handler: @escaping (Bool) -> Void) -> Disposable {
         return eventSubject.subscribe(onNext: handler)
-    }
-    
-    func execute() {
-        if canExecute() {
-            eventSubject.onNext(true)
-            isCalling = true
-            executeHandler()
-        }
-        else {
-            SttLog.trace(message: "Command could not be execute. Can execute return: \(canExecute())", key: "SttComand")
-        }
-    }
-    func canExecute() -> Bool {
-        if let handler = canExecuteHandler {
-            return handler()
-        }
-        return true
     }
     
     func useWork<T>(observable: Observable<T>) -> Observable<T> {
@@ -96,6 +126,9 @@ class SttComand {
                 self.eventSubject.onNext(false)
                 self.isCalling = false
             }
+        }, onSubscribed: {
+            self.eventSubject.onNext(true)
+            self.isCalling = true
         }, onDispose: {
             if self.isCalling {
                 self.eventSubject.onNext(false)
@@ -105,13 +138,16 @@ class SttComand {
     }
 }
 
-class SttComandWithParametr<TParametr> {
+class SttComandWithParametr<TParametr>: SttCommandType {
     
+    private var canNextSubject = PublishSubject<Bool>()
     private var eventSubject = PublishSubject<Bool>()
     private var executeHandler: ((TParametr) -> Void)
     private var canExecuteHandler: ((TParametr) -> Bool)?
     
     private var isCalling = false
+    
+    var observableCanNext: Observable<Bool> { return canNextSubject }
     
     var concurentExecute: Bool = false
     
@@ -142,27 +178,19 @@ class SttComandWithParametr<TParametr> {
         eventSubject.dispose()
     }
     
-    // TODO: Probably needed add call end on disposed
-    func useWork(start: (() -> Void)?, end: (() -> Void)?) -> Disposable {
-        
-        return eventSubject.subscribe(onNext: { res in
-            if res {
-                start?()
-            }
-            else {
-                end?()
-            }
-        })
+    func execute(parametr: Any?) {
+        self.execute(parametr: parametr as! TParametr)
+    }
+    func canExecute(parametr: Any?) -> Bool {
+        return self.canExecute(parametr: parametr as! TParametr)
     }
     
-    func useWord(handler: @escaping (Bool) -> Void) -> Disposable {
-        return eventSubject.subscribe(onNext: handler)
+    func raiseCanExecute(parametr: Any?) {
+        canNextSubject.onNext(canExecute(parametr: parametr))
     }
     
     func execute(parametr: TParametr) {
         if canExecute(parametr: parametr) {
-            eventSubject.onNext(true)
-            isCalling = true
             executeHandler(parametr)
         }
         else {
@@ -176,6 +204,23 @@ class SttComandWithParametr<TParametr> {
         return true
     }
     
+    
+    // TODO: Probably needed add call end on disposed
+    func useWork(start: (() -> Void)?, end: (() -> Void)?) -> Disposable {
+        
+        return eventSubject.subscribe(onNext: { res in
+            if res {
+                start?()
+            }
+            else {
+                end?()
+            }
+        })
+    }
+
+    func useWork(handler: @escaping (Bool) -> Void) -> Disposable {
+        return eventSubject.subscribe(onNext: handler)
+    }
     func useWork<T>(observable: Observable<T>) -> Observable<T> {
         return observable.do(onNext: { (element) in
             if self.singleCallEndCallback && self.isCalling {

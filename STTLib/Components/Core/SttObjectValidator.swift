@@ -15,88 +15,76 @@ enum ValidatorError: Error {
 
 /// Represent result of validation
 enum SttValidationResult {
-    case ok, inCorrect, taken
+    case ok, taken
     case toShort, toLong, empty
     case isNotMatch
+    case inCorrect, specialIncorrect
 }
 
-/// Represent base of type for all validator
-protocol SttValidatorType {
-    
-    var name: String { get }
-    
-    var isRequired: Bool { get }
-    var regexPattern: String? { get }
-    var min: Int { get }
-    var max: Int { get }
-    
-    func validate(object: String?) -> SttValidationResult
-}
-
-extension SttValidatorType {
-    
-    func getValidationError(of validationResult: SttValidationResult) throws -> String {
-        
-        var result: String!
-        
-        switch validationResult {
-        
-        case .ok: result = ""
-        case .inCorrect: result = "\(name) is incorrect."
-        case .toShort: result = "\(name) must be not less than \(min) characters long."
-        case .toLong: result = "\(name) must be not more than \(max) characters long."
-        case .empty: result = "\(name) is required."
-        default: throw ValidatorError.unsupportedResultType
-            
-        }
-        
-        return result
-    }
-    
-    func validate(object: String?) -> SttValidationResult {
-        var result: SttValidationResult!
-        do {
-            if SttString.isEmpty(string: object) {
-                if isRequired {
-                    result = .empty
-                }
-                else {
-                    result = .ok
-                }
-            }
-            else if regexPattern != nil {
-                
-                let nsObject = object! as NSString
-                let regex = try NSRegularExpression(pattern: regexPattern!)
-                if regex.matches(in: object!, range: NSRange(location: 0, length: nsObject.length)).count != 1 {
-//                    if let customError = customIncorrectError {
-//                        validationResult = .inCorrect
-//                        validationError = customError
-//                    }
-                    result = .inCorrect
-                }
-                
-            }
-            else if (object! as NSString).length < min {
-                result = .toShort
-            }
-            else if (object! as NSString).length > max {
-                result = .toLong
-            }
-            else {
-                result = .ok
-            }
-        }
-        catch {
-            SttLog.error(message: "error \(error) in validate \(object!)", key: "SttValidationObject")
-            
-            result = .inCorrect
-        }
-        
-        return result
-    }
-    
-}
+//extension SttValidatorType {
+//    
+//    func getValidationError(of validationResult: SttValidationResult) throws -> String {
+//        
+//        var result: String!
+//        
+//        switch validationResult {
+//        
+//        case .ok: result = ""
+//        case .inCorrect: result = "\(name) is incorrect."
+//        case .toShort: result = "\(name) must be not less than \(min) characters long."
+//        case .toLong: result = "\(name) must be not more than \(max) characters long."
+//        case .empty: result = "\(name) is required."
+//        default: throw ValidatorError.unsupportedResultType
+//            
+//        }
+//        
+//        return result
+//    }
+//    
+//    func validate(object: String?) -> SttValidationResult {
+//        var result: SttValidationResult!
+//        do {
+//            if SttString.isEmpty(string: object) {
+//                if isRequired {
+//                    result = .empty
+//                }
+//                else {
+//                    result = .ok
+//                }
+//            }
+//            else if regexPattern != nil {
+//                
+//                let nsObject = object! as NSString
+//                let regex = try NSRegularExpression(pattern: regexPattern!)
+//                if regex.matches(in: object!, range: NSRange(location: 0, length: nsObject.length)).count != 1 {
+////                    if let customError = customIncorrectError {
+////                        validationResult = .inCorrect
+////                        validationError = customError
+////                    }
+//                    result = .inCorrect
+//                }
+//                
+//            }
+//            else if (object! as NSString).length < min {
+//                result = .toShort
+//            }
+//            else if (object! as NSString).length > max {
+//                result = .toLong
+//            }
+//            else {
+//                result = .ok
+//            }
+//        }
+//        catch {
+//            SttLog.error(message: "error \(error) in validate \(object!)", key: "SttValidationObject")
+//            
+//            result = .inCorrect
+//        }
+//        
+//        return result
+//    }
+//    
+//}
 
 class SttValidationObject {
     

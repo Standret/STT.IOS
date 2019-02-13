@@ -27,9 +27,6 @@ extension ObservableType where E == (HTTPURLResponse, Data) {
                 switch urlResponse.statusCode {
                 case 200 ... 299:
                     do {
-//                        print("---")
-//                        print(String(data: data, encoding: String.Encoding.utf8))
-//                        print("---")
                         let decoder = JSONDecoder()
                         decoder.dateDecodingStrategy = .customISO8601
                         let jsonObject = try decoder.decode(TResult.self, from: data)
@@ -40,7 +37,9 @@ extension ObservableType where E == (HTTPURLResponse, Data) {
                         observer.onError(SttBaseError.jsonConvert("\(error)"))
                     }
                 case 400:
-                    observer.onError(SttBaseError.apiError(SttApiError.badRequest((try? JSONDecoder().decode(ServiceResult.self, from: data))?.error ?? ServerError(code: 400, description: String(data: data, encoding: String.Encoding.utf8) ?? ""))))
+                    let object = (try? JSONDecoder().decode(ServerError.self, from: data))
+                            ?? ServerError(code: 400, description: (String(data: data, encoding: String.Encoding.utf8) ?? ""))
+                    observer.onError(SttBaseError.apiError(SttApiError.badRequest(object)))
                 case 500:
                     observer.onError(SttBaseError.apiError(SttApiError.internalServerError(String(data: data, encoding: String.Encoding.utf8) ?? "nil")))
                 default:
@@ -58,15 +57,17 @@ extension ObservableType where E == (HTTPURLResponse, Data) {
         })
     }
     
-    func getResult() -> Observable<Bool> {
-        return Observable<Bool>.create({ (observer) -> Disposable in
+    func getResult() -> Observable<Void> {
+        return Observable<Void>.create({ (observer) -> Disposable in
             self.subscribe(onNext: { (urlResponse, data) in
                 switch urlResponse.statusCode {
                 case 200 ... 299:
-                    observer.onNext(true)
+                    observer.onNext(())
                     observer.onCompleted()
                 case 400:
-                    observer.onError(SttBaseError.apiError(SttApiError.badRequest((try? JSONDecoder().decode(ServiceResult.self, from: data))?.error ?? ServerError(code: 400, description: String(data: data, encoding: String.Encoding.utf8) ?? ""))))
+                    let object = (try? JSONDecoder().decode(ServerError.self, from: data))
+                        ?? ServerError(code: 400, description: (String(data: data, encoding: String.Encoding.utf8) ?? ""))
+                    observer.onError(SttBaseError.apiError(SttApiError.badRequest(object)))
                 case 500:
                     observer.onError(SttBaseError.apiError(SttApiError.internalServerError(String(data: data, encoding: String.Encoding.utf8) ?? "nil")))
                 default:

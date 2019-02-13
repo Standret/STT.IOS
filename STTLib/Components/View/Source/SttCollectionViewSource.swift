@@ -22,6 +22,21 @@ class SttCollectionViewSource<T: SttViewInjector>: NSObject, UICollectionViewDat
     
     private var disposables: Disposable?
     
+    init(collectionView: UICollectionView, cellIdentifiers: [SttIdentifiers], collection: SttObservableCollection<T>) {
+        _collectionView = collectionView
+        _cellIdentifier = cellIdentifiers.map({ $0.identifers })
+        super.init()
+        
+        for item in cellIdentifiers {
+            if !item.isRegistered {
+                collectionView.register(UINib(nibName: item.nibName ?? item.identifers, bundle: nil), forCellWithReuseIdentifier: item.identifers)
+            }
+        }
+        
+        _collectionView.dataSource = self
+        updateSource(collection: collection)
+    }
+    
     func updateSource(collection: SttObservableCollection<T>) {
         _collection = collection
         _collectionView.reloadData()
@@ -38,20 +53,6 @@ class SttCollectionViewSource<T: SttViewInjector>: NSObject, UICollectionViewDat
                 self?._collectionView.reloadItems(at: indexes.map({ IndexPath(row: $0, section: 0) }))
             }
         })
-    }
-    
-    init(collectionView: UICollectionView, cellIdentifiers: [SttIdentifiers], collection: SttObservableCollection<T>) {
-        _collectionView = collectionView
-        _cellIdentifier = cellIdentifiers.map({ $0.identifers })
-        super.init()
-        
-        for item in cellIdentifiers {
-            if !item.isRegistered {
-                collectionView.register(UINib(nibName: item.nibName ?? item.identifers, bundle: nil), forCellWithReuseIdentifier: item.identifers)
-            }
-        }
-        
-        updateSource(collection: collection)
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {

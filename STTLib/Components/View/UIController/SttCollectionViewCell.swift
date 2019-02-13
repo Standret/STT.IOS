@@ -15,6 +15,6 @@ class SttCollectionViewCell<T: SttViewInjector>: UICollectionViewCell, SttViewab
     
     private var firstStart = true
     func prepareBind() {
-        //presenter.injectView(delegate: self)
+        presenter.injectView(delegate: self)
     }
 }

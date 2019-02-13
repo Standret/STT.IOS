@@ -10,7 +10,8 @@ import Foundation
 import RxSwift
 import UIKit
 
-extension SttComand {
+extension SttCommand {
+    @discardableResult
     func useIndicator(button: UIButton, style: UIActivityIndicatorView.Style = .gray) -> Disposable {
         let indicator = button.setIndicator()
         indicator.color = UIColor.white
@@ -36,6 +37,7 @@ extension SttComand {
         }
     }
     
+    @discardableResult
     func useIndicator(view:  UIView, style: UIActivityIndicatorView.Style = .gray) -> Disposable {
         
         let indicator = view.setIndicator()
@@ -51,6 +53,7 @@ extension SttComand {
         }
     }
     
+    @discardableResult
     func useRefresh(refreshControl: UIRefreshControl) -> Disposable {
         return self.useWork(start: nil) {
             refreshControl.endRefreshing()
@@ -59,6 +62,8 @@ extension SttComand {
 }
 
 extension SttComandWithParametr {
+    
+    @discardableResult
     func useIndicator(button: UIButton, style: UIActivityIndicatorView.Style = .gray) -> Disposable {
         let indicator = button.setIndicator()
         indicator.color = UIColor.white
@@ -82,6 +87,7 @@ extension SttComandWithParametr {
         }
     }
     
+    @discardableResult
     func useIndicator(view:  UIView, style: UIActivityIndicatorView.Style = .gray) -> Disposable {
         
         let indicator = view.setIndicator()
@@ -95,6 +101,7 @@ extension SttComandWithParametr {
         }
     }
     
+    @discardableResult
     func useRefresh(refreshControl: UIRefreshControl) -> Disposable {
         return self.useWork(start: nil) {
             refreshControl.endRefreshing()

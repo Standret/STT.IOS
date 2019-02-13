@@ -20,6 +20,8 @@ class SttInputBox: UIView, SttViewable {
     
     private var _textField: UITextField!
     var textField: UITextField { return _textField }
+    
+    private var icon: UIImageView!
     private var label: UILabel!
     private var errorLabel: UILabel!
     private var underline: UIView!
@@ -28,6 +30,7 @@ class SttInputBox: UIView, SttViewable {
     
     private var textsLeft = [NSLayoutConstraint]()
     private var textsRight = [NSLayoutConstraint]()
+    private var cnstrtfToRight: NSLayoutConstraint!
     
     let textFieldHandler = SttHandlerTextField()
     
@@ -49,7 +52,7 @@ class SttInputBox: UIView, SttViewable {
             }
             
             for ritem in textsRight {
-                ritem.constant = textEdges.right
+                ritem.constant = -textEdges.right
             }
         }
     }
@@ -169,6 +172,7 @@ class SttInputBox: UIView, SttViewable {
         viewDidLoad()
     }
     
+    @discardableResult
     override func becomeFirstResponder() -> Bool {
         return textField.becomeFirstResponder()
     }
@@ -183,15 +187,19 @@ class SttInputBox: UIView, SttViewable {
     private func viewDidLoad() {
         
         initTextField()
+        initIcon()
         initLabel()
         initUnderline()
         initError()
+        
+        changeType(type: typeInputBox)
     }
     
     private func initTextField() {
         
         _textField = UITextField()
         _textField.borderStyle = .none
+        _textField.keyboardType = .asciiCapable
         _textField.textAlignment = .left
         _textField.autocorrectionType = .no
         _textField.autocapitalizationType = .none
@@ -199,12 +207,20 @@ class SttInputBox: UIView, SttViewable {
         _textField.delegate = textFieldHandler
         _textField.clearButtonMode = .never
         _textField.height(40)
+        
+        if #available(iOS 12, *) {
+            textField.textContentType = .oneTimeCode
+        } else {
+            textField.textContentType = .init(rawValue: "")
+        }
 
         addSubview(_textField)
         
         _textField.topToSuperview(offset: 20)
         textsLeft.append(_textField.leftToSuperview(offset: textEdges.left))
-        textsRight.append(_textField.rightToSuperview(offset: textEdges.right))
+        
+        cnstrtfToRight = _textField.rightToSuperview(offset: textEdges.right)
+        textsRight.append(cnstrtfToRight)
         
         textFieldHandler.addTarget(type: .didStartEditing, delegate: self,
                                    handler: { (v, _) in v.startEditing() },
@@ -221,6 +237,25 @@ class SttInputBox: UIView, SttViewable {
                                         v.endEditing()
                                     } },
                                    textField: _textField)
+    }
+    private func initIcon() {
+        icon = UIImageView()
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        icon.image = UIImage(named: "eye_open")
+        icon.isUserInteractionEnabled = true
+        icon.contentMode = .center
+
+        icon.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(iconClickHandler(_:))))
+
+        addSubview(icon)
+
+        icon.height(22)
+        icon.width(22)
+
+        cnstrtfToRight.isActive = false
+        icon.leftToRight(of: textField, offset: 2, priority: LayoutPriority(rawValue: 750))
+        icon.rightToSuperview(offset: -(textEdges.right + 2))
+        icon.centerY(to: textField)
     }
     private func initLabel() {
         label = UILabel(frame: CGRect(x: textEdges.left, y: 32, width: 300, height: 22))
@@ -252,8 +287,19 @@ class SttInputBox: UIView, SttViewable {
         
         errorLabel.bottomToSuperview(offset: 3)
         textsLeft.append(errorLabel.leftToSuperview(offset: textEdges.left))
-        textsRight.append(errorLabel.leftToSuperview(offset: textEdges.right))
+        textsRight.append(errorLabel.rightToSuperview(offset: textEdges.right))
         errorLabel.topToBottom(of: underline, offset: 2)
+    }
+    
+    @objc private func iconClickHandler(_ sender: Any) {
+        
+        if typeInputBox == .security {
+            textField.isSecureTextEntry = !textField.isSecureTextEntry
+            icon.image = textField.isSecureTextEntry ? UIImage(named: "eye_open") : UIImage(named: "eye_close")
+        }
+        else {
+            textField.becomeFirstResponder()
+        }
     }
     
     private func startEditing() {
@@ -306,10 +352,14 @@ class SttInputBox: UIView, SttViewable {
     private func changeType(type: TypeInputBox) {
         _textField.isSecureTextEntry = false
         _textField.isUserInteractionEnabled = true
+        icon.isHidden = true
+        cnstrtfToRight.isActive = true
         
         switch type {
         case .text: break;
         case .security:
+            icon.isHidden = false
+            cnstrtfToRight.isActive = false
             _textField.isSecureTextEntry = true
         }
     }
