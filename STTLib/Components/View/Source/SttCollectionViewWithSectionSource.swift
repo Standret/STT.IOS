@@ -36,7 +36,7 @@ class SttCollectionViewWithSectionSource<TCell: SttViewInjector, TSection: SttVi
         disposable = DisposeBag()
         for index in 0..<collection.count {
             collection[index].0.observableObject.subscribe(onNext: { [weak self] (indexes, type) in
-                self?._collectionView.performBatchUpdates({
+                self?._collectionView.performBatchUpdates({ [weak self] in
                     switch type {
                     case .reload:
                         self?.countData = self?.collection.map({ $0.0.count })

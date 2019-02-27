@@ -88,7 +88,6 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
                 backgroundLayer.alpha = 0
             }
         }
-        
     }
     
     func manageWrappedView(color: UIColor, hide: Bool, useIndicator: Bool = true) {

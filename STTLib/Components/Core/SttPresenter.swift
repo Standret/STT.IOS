@@ -25,7 +25,7 @@ class SttPresenter<TDelegate> : SttViewControllerInjector {
         
     var delegate: TDelegate? { return _delegate as? TDelegate }
     
-    init(notificationError: SttNotificationErrorServiceType?) {
+    init (notificationError: SttNotificationErrorServiceType?) {
         _notificationError = notificationError
     }
     

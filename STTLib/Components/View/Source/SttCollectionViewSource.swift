@@ -14,6 +14,8 @@ class SttCollectionViewSource<T: SttViewInjector>: NSObject, UICollectionViewDat
     
     private var _collectionView: UICollectionView
     
+    private var countData = 0
+    
     private var _cellIdentifier: [String]
     var cellIdentifier: [String] { return _cellIdentifier }
     
@@ -39,19 +41,25 @@ class SttCollectionViewSource<T: SttViewInjector>: NSObject, UICollectionViewDat
     
     func updateSource(collection: SttObservableCollection<T>) {
         _collection = collection
+        countData = collection.count
         _collectionView.reloadData()
         disposables?.dispose()
         disposables = _collection.observableObject.subscribe(onNext: { [weak self] (indexes, type) in
-            switch type {
-            case .reload:
-                self?._collectionView.reloadData()
-            case .delete:
-                self?._collectionView.deleteItems(at: indexes.map({ IndexPath(row: $0, section: 0) }))
-            case .insert:
-                self?._collectionView.insertItems(at: indexes.map({ IndexPath(row: $0, section: 0) }))
-            case .update:
-                self?._collectionView.reloadItems(at: indexes.map({ IndexPath(row: $0, section: 0) }))
+            self?._collectionView.performBatchUpdates({ [weak self] in
+                switch type {
+                case .reload:
+                    self?.countData = collection.count
+                    self?._collectionView.reloadData()
+                case .delete:
+                    self?._collectionView.deleteItems(at: indexes.map({ IndexPath(row: $0, section: 0) }))
+                    self?.countData = collection.count
+                case .insert:
+                    self?._collectionView.insertItems(at: indexes.map({ IndexPath(row: $0, section: 0) }))
+                    self?.countData = collection.count
+                case .update:
+                    self?._collectionView.reloadItems(at: indexes.map({ IndexPath(row: $0, section: 0) }))
             }
+            })
         })
     }
     
@@ -59,14 +67,18 @@ class SttCollectionViewSource<T: SttViewInjector>: NSObject, UICollectionViewDat
         return 1
     }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return _collection == nil ? 0 : _collection.count
+        return countData
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = _collectionView.dequeueReusableCell(withReuseIdentifier: _cellIdentifier.first!, for: indexPath) as! SttCollectionViewCell<T>
+        let cell = _collectionView.dequeueReusableCell(withReuseIdentifier: collectionViewReusableCell(at: indexPath),
+                                                       for: indexPath) as! SttCollectionViewCell<T>
         cell.presenter = _collection[indexPath.row]
         cell.prepareBind()
         return cell
     }
     
+    func collectionViewReusableCell(at indexPath: IndexPath) -> String {
+        return _cellIdentifier.first!
+    }
 }
