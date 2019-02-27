@@ -9,6 +9,9 @@
 import Foundation
 import RxSwift
 
+/**
+ A dynamic property which inform subscribers about value changing
+ */
 class Dynamic<Element> {
     
     typealias Listener = (Element) -> Void
@@ -27,6 +30,7 @@ class Dynamic<Element> {
         element = Variable<Element>(value)
     }
     
+    /// Subscribe on changes and read current value
     func bind(_ listener: @escaping Listener) {
         element.asObservable()
             .subscribe(onNext: listener)
@@ -35,6 +39,7 @@ class Dynamic<Element> {
         listener(element.value)
     }
     
+    /// Subscribe only on changes
     func addListener(_ listener: @escaping Listener) {
         element.asObservable()
             .subscribe(onNext: listener)
@@ -43,9 +48,5 @@ class Dynamic<Element> {
     
     func dispose() {
         disposeBag = DisposeBag()
-    }
-    
-    deinit {
-        print("Dynamic deinit")
     }
 }

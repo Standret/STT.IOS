@@ -10,6 +10,11 @@ import Foundation
 import RxSwift
 import UIKit
 
+// TODO: write this comment
+/**
+ A binding for button events (touchUpInside by default)
+ and redirect this events to command
+ */
 class SttButtonBindingSet: SttBindingContextType {
 
     unowned private let button: UIButton
@@ -23,10 +28,6 @@ class SttButtonBindingSet: SttBindingContextType {
     init (button: UIButton) {
         
         self.button = button
-    }
-    
-    deinit {
-        print("SttButtonBindingSet deinit")
     }
     
     @discardableResult
@@ -51,6 +52,18 @@ class SttButtonBindingSet: SttBindingContextType {
         handler.addTarget(type: .touchUpInside, delegate: self, handler: { (d,_) in d.command.execute(parametr: d.parametr) }, button: button)
     }
 }
+
+/**
+ 
+ Custom operators
+ Second way to write bindings
+ 
+ For more information look at our documentation on github
+ 
+ UPS :\ Something missing
+ If you see this message just write me. Prter Standret
+ 
+ */
 
 @discardableResult
 func ->> (left: SttButtonBindingSet, right: SttCommandType) -> SttButtonBindingSet{

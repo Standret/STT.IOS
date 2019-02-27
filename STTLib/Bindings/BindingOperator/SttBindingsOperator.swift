@@ -9,6 +9,18 @@
 import Foundation
 import UIKit
 
+/**
+ 
+ Custom operators
+ Second way to write bindings
+ 
+ For more information look at our documentation on github
+ 
+ UPS :\ Something missing
+ If you see this message just write me. Prter Standret
+ 
+ */
+
 func => <TV: AnyObject>(left: SttBindingSet<TV>, right: UILabel) -> SttLabelBindingContext<TV> {
     return left.bind(right)
 }

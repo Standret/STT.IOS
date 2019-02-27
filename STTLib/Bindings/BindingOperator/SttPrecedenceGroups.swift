@@ -38,5 +38,6 @@ precedencegroup ConverterSet {
 
 // for converter
 infix operator >-<: BindingSet
+
 // for command and converter parametr
 infix operator -<: BindingSet

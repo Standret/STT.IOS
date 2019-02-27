@@ -73,11 +73,7 @@ class SttTextFieldBindingContext<TViewController: AnyObject>: SttGenericBindingC
             bindEditing()
         }
     }
-    
-    deinit {
-        print("TextField Set deinit")
-    }
-    
+ 
     private func bindSpecial() {
         handler.addTarget(type: forProperty!, delegate: self,
                           handler: { (d,_) in d.command.execute(parametr: d.parametr) })
@@ -99,6 +95,16 @@ class SttTextFieldBindingContext<TViewController: AnyObject>: SttGenericBindingC
             }, textField: textField)
         default: break
         }
+        
+        super.forProperty({ [unowned self] (_, value) in
+            let cvalue = self.converter != nil ? self.converter?.convert(value: value, parametr: self.parametr) : value
+            if let _cvalue = cvalue as? String {
+                self.textField.text = _cvalue
+            }
+            else {
+                fatalError("Incorrect type, expected String?")
+            }
+        })
 
         switch bindingMode {
 

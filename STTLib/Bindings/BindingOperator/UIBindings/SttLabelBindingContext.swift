@@ -24,8 +24,4 @@ class SttLabelBindingContext<TViewController: AnyObject>: SttGenericBindingConte
         
         super.init(vc: viewController)
     }
-    
-    deinit {
-        print("TextField Set deinit")
-    }
 }
