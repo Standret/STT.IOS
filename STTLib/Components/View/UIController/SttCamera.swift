@@ -8,8 +8,10 @@
 
 import Foundation
 import UIKit
+import AVFoundation
 
 class SttCamera: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
     private let picker = UIImagePickerController()
     private let callBack: (UIImage) -> Void
     private weak var parent: UIViewController?
@@ -21,31 +23,68 @@ class SttCamera: NSObject, UIImagePickerControllerDelegate, UINavigationControll
         picker.delegate = self
     }
     
-    func takePhoto() {
+    private func takePhoto() {
         picker.sourceType = .camera
         parent?.present(picker, animated: true, completion: nil)
     }
-    func selectPhoto() {
+    private func selectPhoto() {
         picker.sourceType = .photoLibrary
         parent?.present(picker, animated: true, completion: nil)
     }
     
     func showPopuForDecision() {
-        let actionController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        actionController.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler: { (x) in
-            self.selectPhoto()
-        }))
-        actionController.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { (x) in
-            self.takePhoto()
-        }))
-        actionController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        if checkPermission() {
+            let actionController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            actionController.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { (x) in
+                self.takePhoto()
+            }))
+            actionController.addAction(UIAlertAction(title: "Choose from Library", style: .default, handler: { (x) in
+                self.selectPhoto()
+            }))
+            actionController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            
+            for item in actionController.view.subviews.first!.subviews.first!.subviews {
+                item.backgroundColor = UIColor.white
+            }
+            
+            parent?.present(actionController, animated: true, completion: nil)
+        }
+        else {
+            showPermissionDeniedPopup()
+        }
+    }
+    
+    private func checkPermission() -> Bool {
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
         
-        for item in actionController.view.subviews.first!.subviews.first!.subviews {
-            item.backgroundColor = UIColor.white
+        switch status {
+        case .authorized, .notDetermined:
+            return true
+        case .denied, .restricted:
+            return false
+        }
+    }
+    
+    private func showPermissionDeniedPopup() {
+        let alertController = UIAlertController(title: "Change your settings and give Lemon access to your camera and photos.",
+                                                message: "Open your app settings, click on \"privacy\" and than \"photos\"",
+                                                preferredStyle: .alert)
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        
+        let openAction = UIAlertAction(title: "Open Settings", style: .default) { (action) in
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
         }
         
-        parent?.present(actionController, animated: true, completion: nil)
+        alertController.addAction(openAction)
+        
+        parent?.present(alertController, animated: true, completion: nil)
     }
+    
+    // MARK: - implementation of UIImagePickerControllerDelegate
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
@@ -53,6 +92,5 @@ class SttCamera: NSObject, UIImagePickerControllerDelegate, UINavigationControll
             callBack(_image)
         }
         picker.dismiss(animated: true, completion: nil)
-
     }
 }

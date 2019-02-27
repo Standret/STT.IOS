@@ -12,7 +12,7 @@ import UIKit
 @IBDesignable
 class SttTextField: UITextField {
     
-    var insets: UIEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
+    var insets: UIEdgeInsets = UIEdgeInsets.zero
     
     override func editingRect(forBounds bounds: CGRect) -> CGRect {
         return insertRect(rect: bounds, insets: insets)
@@ -25,5 +25,12 @@ class SttTextField: UITextField {
     private func insertRect(rect: CGRect, insets: UIEdgeInsets) -> CGRect {
         return CGRect(x: Double(rect.minX + insets.left), y: Double(rect.minY + insets.top),
                       width: Double(rect.width - insets.left - insets.right), height: Double(rect.height - insets.top - insets.bottom))
+    }
+    
+    override func caretRect(for position: UITextPosition) -> CGRect {
+        
+        var rect = super.caretRect(for: position)
+        rect.size.width = 2
+        return rect
     }
 }

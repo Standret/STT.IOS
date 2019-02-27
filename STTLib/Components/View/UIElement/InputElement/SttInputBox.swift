@@ -12,16 +12,23 @@ import TinyConstraints
 
 enum TypeInputBox {
     case text
-    case security
+    case security(TypeShpwPassword)
+}
+
+enum TypeShpwPassword {
+    case none
+    case eye
+    case text
 }
 
 @IBDesignable
 class SttInputBox: UIView, SttViewable {
     
-    private var _textField: UITextField!
-    var textField: UITextField { return _textField }
+    private(set) var textField: UITextField!
     
     private var icon: UIImageView!
+    private var showButton: SttButton!
+    
     private var label: UILabel!
     private var errorLabel: UILabel!
     private var underline: UIView!
@@ -36,7 +43,7 @@ class SttInputBox: UIView, SttViewable {
     
     private var cnstrUnderlineHeight: NSLayoutConstraint!
     private var cnstrErrorHeight: NSLayoutConstraint!
-    
+    private var cnstrRightIconTF, cnstrRightButtonTF: NSLayoutConstraint!
     /// disable or enable all start and end editing animation
     var isAnimate: Bool = true
     
@@ -66,9 +73,11 @@ class SttInputBox: UIView, SttViewable {
     @objc dynamic var isSimpleLabel: Bool = false {
         didSet {
             label.isHidden = isSimpleLabel
-            _textField.placeholder = isSimpleLabel ? label.text : ""
+            textField.placeholder = isSimpleLabel ? label.text : ""
         }
     }
+    
+    @objc dynamic var useVibrationOnError = false
     
     var typeInputBox: TypeInputBox = .text {
         didSet {
@@ -77,37 +86,38 @@ class SttInputBox: UIView, SttViewable {
     }
     
     var text: String? {
-        get { return _textField.text }
+        get { return textField.text }
         set {
             if !isEdited {
                 startEditing()
             }
             
-            _textField.text = newValue
+            textField.text = newValue
         }
     }
     
     var error: String? {
         didSet {
-            errorLabel.text = error
             
             if !SttString.isWhiteSpace(string: error) {
                 underline.backgroundColor = errorColor
-//                if isEdited {
-//                    label.textColor = errorColor
-//                }
+                if useVibrationOnError && SttString.isWhiteSpace(string: errorLabel.text) {
+                    UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+                }
             }
             else {
                 underline.backgroundColor = isEdited ? underlineActiveColor : underlineDisableColor
                 label.textColor = isEdited ? labelActiveColor : labelDisableColor
             }
+            
+            errorLabel.text = error
         }
     }
     
     // MARK: Appereance
     @objc dynamic var textFieldFont: UIFont? {
-        get { return _textField.font }
-        set { _textField.font = newValue }
+        get { return textField.font }
+        set { textField.font = newValue }
     }
     @objc dynamic var labelFont: UIFont? {
         get { return label.font }
@@ -119,8 +129,8 @@ class SttInputBox: UIView, SttViewable {
     }
     
     @objc dynamic var textFieldColor: UIColor? {
-        get { return _textField.textColor }
-        set { if SttString.isEmpty(string: text) { _textField.textColor = newValue } }
+        get { return textField.textColor }
+        set { if SttString.isEmpty(string: text) { textField.textColor = newValue } }
     }
     @objc dynamic var errorColor: UIColor? {
         get { return errorLabel.textColor }
@@ -160,6 +170,29 @@ class SttInputBox: UIView, SttViewable {
         }
     }
     
+    @objc dynamic var showButtonShowText: String? {
+        get { return showButton.title(for: .normal) }
+        set { showButton.setTitle(newValue, for: .normal) }
+    }
+    @objc dynamic var showButtonHideText: String? {
+        get { return showButton.title(for: .normal) }
+        set { showButton.setTitle(newValue, for: .selected) }
+    }
+    
+    @objc dynamic var fontShowButton: UIFont {
+        get { return showButton.titleFont }
+        set { showButton.titleFont = newValue }
+    }
+    
+    @objc dynamic var titleShowColorShowButton: UIColor? {
+        get { return showButton.titleColor(for: .normal) }
+        set { showButton.setTitleColor(newValue, for: .normal) }
+    }
+    @objc dynamic var titleHideShowButton: UIColor? {
+        get { return showButton.titleColor(for: .normal) }
+        set { showButton.setTitleColor(newValue, for: .selected) }
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -188,6 +221,7 @@ class SttInputBox: UIView, SttViewable {
         
         initTextField()
         initIcon()
+        initButtonShow()
         initLabel()
         initUnderline()
         initError()
@@ -197,16 +231,16 @@ class SttInputBox: UIView, SttViewable {
     
     private func initTextField() {
         
-        _textField = UITextField()
-        _textField.borderStyle = .none
-        _textField.keyboardType = .asciiCapable
-        _textField.textAlignment = .left
-        _textField.autocorrectionType = .no
-        _textField.autocapitalizationType = .none
-        _textField.translatesAutoresizingMaskIntoConstraints = false
-        _textField.delegate = textFieldHandler
-        _textField.clearButtonMode = .never
-        _textField.height(40)
+        textField = SttTextField()
+        textField.borderStyle = .none
+        textField.keyboardType = .asciiCapable
+        textField.textAlignment = .left
+        textField.autocorrectionType = .no
+        textField.autocapitalizationType = .none
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.delegate = textFieldHandler
+        textField.clearButtonMode = .never
+        textField.height(40)
         
         if #available(iOS 12, *) {
             textField.textContentType = .oneTimeCode
@@ -214,20 +248,20 @@ class SttInputBox: UIView, SttViewable {
             textField.textContentType = .init(rawValue: "")
         }
 
-        addSubview(_textField)
+        addSubview(textField)
         
-        _textField.topToSuperview(offset: 20)
-        textsLeft.append(_textField.leftToSuperview(offset: textEdges.left))
+        textField.topToSuperview(offset: 19)
+        textsLeft.append(textField.leftToSuperview(offset: textEdges.left))
         
-        cnstrtfToRight = _textField.rightToSuperview(offset: textEdges.right)
+        cnstrtfToRight = textField.rightToSuperview(offset: textEdges.right)
         textsRight.append(cnstrtfToRight)
         
         textFieldHandler.addTarget(type: .didStartEditing, delegate: self,
                                    handler: { (v, _) in v.startEditing() },
-                                   textField: _textField)
+                                   textField: textField)
         textFieldHandler.addTarget(type: .didEndEditing, delegate: self,
                                    handler: { (v, _) in v.endEditing() },
-                                   textField: _textField)
+                                   textField: textField)
         textFieldHandler.addTarget(type: .editing, delegate: self,
                                    handler: { (v, tf) in
                                     if !SttString.isEmpty(string: tf.text) {
@@ -236,8 +270,9 @@ class SttInputBox: UIView, SttViewable {
                                     if !tf.isEditing {
                                         v.endEditing()
                                     } },
-                                   textField: _textField)
+                                   textField: textField)
     }
+    
     private func initIcon() {
         icon = UIImageView()
         icon.translatesAutoresizingMaskIntoConstraints = false
@@ -245,20 +280,38 @@ class SttInputBox: UIView, SttViewable {
         icon.isUserInteractionEnabled = true
         icon.contentMode = .center
 
-        icon.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(iconClickHandler(_:))))
+        icon.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(clickShowHandler(_:))))
 
         addSubview(icon)
 
         icon.height(22)
         icon.width(22)
+        icon.centerY(to: textField)
 
         cnstrtfToRight.isActive = false
-        icon.leftToRight(of: textField, offset: 2, priority: LayoutPriority(rawValue: 750))
+        cnstrRightIconTF = icon.leftToRight(of: textField, offset: 2, priority: LayoutPriority(rawValue: 750))
         icon.rightToSuperview(offset: -(textEdges.right + 2))
-        icon.centerY(to: textField)
     }
+    private func initButtonShow() {
+        showButton = SttButton()
+        showButton.translatesAutoresizingMaskIntoConstraints = false
+        showButton.tintColor = .clear
+        
+        addSubview(showButton)
+        
+        showButton.height(30)
+        showButton.width(30, relation: .equalOrGreater)
+        showButton.centerY(to: textField)
+        
+        cnstrtfToRight.isActive = false
+        cnstrRightButtonTF = showButton.leftToRight(of: textField, offset: 2, priority: LayoutPriority(rawValue: 750))
+        showButton.rightToSuperview(offset: -(textEdges.right + 2))
+        
+        showButton.addTarget(self, action: #selector(clickShowHandler(_:)), for: .touchUpInside)
+    }
+    
     private func initLabel() {
-        label = UILabel(frame: CGRect(x: textEdges.left, y: 32, width: 300, height: 22))
+        label = UILabel(frame: CGRect(x: textEdges.left, y: 25, width: 300, height: 22))
         label.textAlignment = .left
         label.text = "Field"
         addSubview(label)
@@ -272,7 +325,7 @@ class SttInputBox: UIView, SttViewable {
         
         addSubview(underline)
         underline.edgesToSuperview(excluding: [.top, .bottom])
-        underline.topToBottom(of: _textField, offset: 5)
+        underline.topToBottom(of: textField, offset: 5)
     }
     private func initError() {
         errorLabel = UILabel()
@@ -291,13 +344,18 @@ class SttInputBox: UIView, SttViewable {
         errorLabel.topToBottom(of: underline, offset: 2)
     }
     
-    @objc private func iconClickHandler(_ sender: Any) {
+    @objc private func clickShowHandler(_ sender: Any) {
         
-        if typeInputBox == .security {
-            textField.isSecureTextEntry = !textField.isSecureTextEntry
-            icon.image = textField.isSecureTextEntry ? UIImage(named: "eye_open") : UIImage(named: "eye_close")
-        }
-        else {
+        switch typeInputBox {
+        case .security(let type):
+            textField.isSecureTextEntry.toggle()
+            switch type {
+            case .eye:
+                icon.image = textField.isSecureTextEntry ? UIImage(named: "eye_open") : UIImage(named: "eye_close")
+            default:
+                showButton.isSelected.toggle()
+            }
+        default:
             textField.becomeFirstResponder()
         }
     }
@@ -315,10 +373,10 @@ class SttInputBox: UIView, SttViewable {
         
         UIView.animate(withDuration: isAnimate ? 0.3 : 0, animations: {
             
-            let trans  = -(self.label.bounds.width - self.label.bounds.width * 0.65) / 2
-            let translation = CGAffineTransform(translationX: trans, y: -32)
-            let scaling = CGAffineTransform(scaleX: 0.65,
-                                            y: 0.65)
+            let trans  = -(self.label.bounds.width - self.label.bounds.width * 0.575) / 2
+            let translation = CGAffineTransform(translationX: trans, y: -25)
+            let scaling = CGAffineTransform(scaleX: 0.575,
+                                            y: 0.575)
             
             self.label.transform = scaling.concatenating(translation)
             
@@ -339,7 +397,7 @@ class SttInputBox: UIView, SttViewable {
             underline.backgroundColor = underlineDisableColor
         }
         
-        if SttString.isEmpty(string: _textField.text) {
+        if SttString.isEmpty(string: textField.text) {
             UIView.animate(withDuration: isAnimate ? 0.3 : 0) {
                 self.label.transform = CGAffineTransform.identity
             }
@@ -350,17 +408,32 @@ class SttInputBox: UIView, SttViewable {
     }
     
     private func changeType(type: TypeInputBox) {
-        _textField.isSecureTextEntry = false
-        _textField.isUserInteractionEnabled = true
-        icon.isHidden = true
+        textField.isSecureTextEntry = false
+        textField.isUserInteractionEnabled = true
         cnstrtfToRight.isActive = true
+        
+        icon.isHidden = true
+        showButton.isHidden = true
+        cnstrRightButtonTF.isActive = false
+        cnstrRightIconTF.isActive = false
         
         switch type {
         case .text: break;
-        case .security:
-            icon.isHidden = false
-            cnstrtfToRight.isActive = false
-            _textField.isSecureTextEntry = true
+        case .security(let type):
+            switch type {
+                
+            case .none: break
+            case .eye:
+                cnstrtfToRight.isActive = false
+                icon.isHidden = false
+                cnstrRightIconTF.isActive = true
+            case .text:
+                cnstrtfToRight.isActive = false
+                showButton.isHidden = false
+                cnstrRightButtonTF.isActive = true
+            }
+            
+            textField.isSecureTextEntry = true
         }
     }
 }

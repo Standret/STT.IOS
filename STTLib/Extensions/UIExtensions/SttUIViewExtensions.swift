@@ -31,8 +31,9 @@ extension UIView {
         self.setBorder(color: UIColor(named: named)!, size: size)
     }
     
-    func setShadow(color: UIColor, size: CGSize = CGSize.zero, opacity: Float = 0.2, radius: Float = 1) {
-        layer.shadowOffset = size
+    func setShadow(color: UIColor, offset: CGSize = CGSize.zero, opacity: Float = 0.2, radius: Float = 1) {
+        
+        layer.shadowOffset = offset
         layer.shadowColor = color.cgColor
         layer.shadowOpacity = opacity
         layer.masksToBounds = false

@@ -21,6 +21,9 @@ class DateConverter: SttConverter<Date, String> {
 }
 
 class SttLog {
+    
+    static var logInSystem = true
+    
     class func trace(message: String, key: String) {
         log(type: "trace", message: message, key: key)
     }
@@ -32,7 +35,13 @@ class SttLog {
     }
     
     fileprivate class func log(type: String, message: String, key: String) {
-        print("[\(type)][\(SttLogDateConverter().convert(value: Date()))] <\(key)> \(message)")
+        
+        if logInSystem {
+            NSLog("<\(key)> \(message)")
+        }
+        else {
+            print("[\(type)][\(SttLogDateConverter().convert(value: Date()))] <\(key)> \(message)")
+        }
     }
 }
 

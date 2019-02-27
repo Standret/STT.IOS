@@ -63,7 +63,9 @@ class SttPresenter<TDelegate> : SttViewControllerInjector {
 class SttPresenterWithParametr<TDelegate, TParametr>: SttPresenter<TDelegate> {
     
     override func prepare(parametr: Any?) {
-        prepare(parametr: parametr as! TParametr)
+        if let param = parametr {
+            prepare(parametr: param as! TParametr)
+        }
     }
     
     func prepare(parametr: TParametr)  { }

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 extension SttViewController: SttViewControlable {
     
@@ -18,6 +19,10 @@ extension SttViewController: SttViewControlable {
         else {
             self.createAlerDialog(title: serror.0, message: serror.1)
         }
+        
+        if useVibrationOnError {
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        }
     }
     func sendError(title: String, description: String) {
         if useErrorLabel {
@@ -25,6 +30,9 @@ extension SttViewController: SttViewControlable {
         }
         else {
             self.createAlerDialog(title: title, message: description)
+        }
+        if useVibrationOnError {
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
         }
     }
     func sendMessage(title: String, message: String?) {

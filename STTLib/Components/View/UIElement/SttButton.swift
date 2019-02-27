@@ -17,11 +17,11 @@ class SttButton: UIButton {
     }
 }
 
-class SttHiglightedButton: SttButton {
+class SttToogleButton: SttButton {
     
     @objc dynamic var unSelectedBackground: UIColor? {
         didSet {
-            if !isHighlighted {
+            if !isSelected {
                 self.backgroundColor = unSelectedBackground
             }
         }
@@ -29,7 +29,7 @@ class SttHiglightedButton: SttButton {
     
     @objc dynamic var selectedBackground: UIColor? {
         didSet {
-            if isHighlighted {
+            if isSelected {
                 self.backgroundColor = selectedBackground
             }
         }

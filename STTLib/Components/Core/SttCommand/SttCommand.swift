@@ -64,7 +64,7 @@ class SttCommand: SttCommandType {
     }
     
     deinit {
-        SttLog.trace(message: "Disposed", key: "SttCommand")
+        canNextSubject.dispose()
         eventSubject.dispose()
     }
     
@@ -174,7 +174,7 @@ class SttComandWithParametr<TParametr>: SttCommandType {
     }
     
     deinit {
-        SttLog.trace(message: "Disposed", key: "SttCommand")
+        canNextSubject.dispose()
         eventSubject.dispose()
     }
     

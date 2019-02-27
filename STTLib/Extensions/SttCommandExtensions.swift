@@ -18,18 +18,19 @@ extension SttCommand {
         indicator.style = style
         
         let title = button.titleLabel?.text
-        var image: UIImage?
+        var image, disImage: UIImage?
         
         return self.useWork(start: {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
             image = button.image(for: .normal)
+            disImage = button.image(for: .disabled)
             button.setImage(nil, for: .normal)
+            button.setImage(nil, for: .disabled)
             button.setTitle("", for: .disabled)
             button.isEnabled = false
             indicator.startAnimating()
         }) {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
             button.setImage(image, for: .normal)
+            button.setImage(disImage, for: .disabled)
             button.setTitle(title, for: .disabled)
             button.setNeedsDisplay()
             button.isEnabled = true
@@ -70,16 +71,19 @@ extension SttComandWithParametr {
         indicator.style = style
         
         let title = button.titleLabel?.text
-        var image: UIImage?
+        var image, disImage: UIImage?
         
         return self.useWork(start: {
             image = button.image(for: .normal)
+            disImage = button.image(for: .disabled)
             button.setImage(nil, for: .normal)
+            button.setImage(nil, for: .disabled)
             button.setTitle("", for: .disabled)
             button.isEnabled = false
             indicator.startAnimating()
         }) {
             button.setImage(image, for: .normal)
+            button.setImage(disImage, for: .disabled)
             button.setTitle(title, for: .disabled)
             button.setNeedsDisplay()
             button.isEnabled = true

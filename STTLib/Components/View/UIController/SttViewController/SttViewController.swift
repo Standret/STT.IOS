@@ -21,6 +21,7 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
     var widthScreen: CGFloat { return UIScreen.main.bounds.width }
     
     var useErrorLabel = true
+    var useVibrationOnError = true
     var hideNavigationBar = false
     var hideTabBar = false
     var customBackBarButton: Bool = false
@@ -46,7 +47,7 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
         
         backgroundLayer = UIView()
         backgroundLayer.translatesAutoresizingMaskIntoConstraints = false
-        backgroundLayer.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)
+        backgroundLayer.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)!
         backgroundLayer.alpha = 0
         view.addSubview(backgroundLayer)
         backgroundLayer.edgesToSuperview()
@@ -82,7 +83,7 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
         if let currentTransitionCoordinator = currentTransitionCoordinator {
             print(currentTransitionCoordinator.percentComplete)
             if isAppeared {
-                backgroundLayer.alpha = 1 - currentTransitionCoordinator.percentComplete
+                backgroundLayer.alpha = 0.75 - currentTransitionCoordinator.percentComplete / 2
             }
             else {
                 backgroundLayer.alpha = 0
@@ -103,35 +104,42 @@ class SttViewController<T: SttViewControllerInjector>: UIViewController {
         }
     }
     
-    fileprivate var isFirstStart = true
     override func viewWillAppear(_ animated: Bool) {
-        isAppeared = true
         super.viewWillAppear(animated)
+        
+        isAppeared = true
+        
         self.presenter.viewAppearing()
+        
+        navigationController?.setNavigationBarHidden(hideNavigationBar, animated: true)
+        navigationController?.navigationBar.isHidden = hideNavigationBar
+    }
+    
+    fileprivate var isFirstStart = true
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         
         if isFirstStart {
             isFirstStart = false
             style()
             bind()
         }
-        
-        UIApplication.shared.statusBarStyle = barStyle
-        UIView.animate(withDuration: 0.3) { [weak self] in
-            self?.setNeedsStatusBarAppearanceUpdate()
-        }
-                
-        navigationController?.setNavigationBarHidden(hideNavigationBar, animated: true)
-        navigationController?.navigationBar.isHidden = hideNavigationBar
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         presenter.viewAppeared()
+        
+        UIApplication.shared.statusBarStyle = barStyle
+        UIView.animate(withDuration: 0.3) { [weak self] in
+            self?.setNeedsStatusBarAppearanceUpdate()
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        isAppeared = false
         super.viewWillDisappear(animated)
+        isAppeared = false
+
         presenter.viewDissapearing()
         
         navigationController?.navigationBar.isHidden = false

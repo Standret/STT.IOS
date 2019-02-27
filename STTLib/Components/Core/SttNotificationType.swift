@@ -29,12 +29,30 @@ class SttNotificationErrorService: SttNotificationErrorServiceType {
     var errorObservable: Observable<SttBaseError> { return subject }
     
     func useError<T>(observable: Observable<T>, ignoreBadRequest: Bool) -> Observable<T> {
-        return observable.do(onError: { (error) in
+        return observable.do(onError: { error in
             if let er = error as? SttBaseError {
-                self.subject.onNext(er)
+                var flag = true
+                if ignoreBadRequest {
+                    switch er {
+                    case .apiError(let api):
+                        switch api {
+                        case .badRequest( _):
+                            flag = false
+                        case .otherApiError(let code):
+                            if code == 401 {
+                                flag = false
+                            }
+                        default: break
+                        }
+                    default: break
+                    }
+                }
+                if flag {
+                    self.subject.onNext(er)
+                }
             }
             else {
-                self.subject.onNext(SttBaseError.unkown("\(error)"))
+                self.subject.onNext(SttBaseError.unkown("\(error.localizedDescription)"))
             }
         })
     }

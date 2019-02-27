@@ -36,6 +36,8 @@ class SttInputView: UIView, SttViewable {
         set { label.text = newValue }
     }
     
+    @objc dynamic var useVibrationOnError = false
+    
     @objc dynamic var maxCount: Int = 70 {
         didSet {
             handlerTextView.maxCharacter = maxCount
@@ -52,6 +54,10 @@ class SttInputView: UIView, SttViewable {
 //                if isEdited {
 //                    label.textColor = errorColor
 //                }
+                if useVibrationOnError {
+                    UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+                }
+                
             }
             else {
                 underline.backgroundColor = isEdited ? underlineActiveColor : underlineDisableColor
@@ -154,13 +160,14 @@ class SttInputView: UIView, SttViewable {
         textView = UITextView()
         textView.textAlignment = .left
         textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.autocorrectionType = .no
         textView.isScrollEnabled = false
         textView.delegate = handlerTextView
         textView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         
         addSubview(textView)
         
-        textView.edgesToSuperview(excluding: .bottom, insets: .top(20) + .left(4) + .right(4))
+        textView.edgesToSuperview(excluding: .bottom, insets: .top(14) + .left(4) + .right(4))
         
         handlerTextView.addTarget(type: .didBeginEditing, delegate: self,
                                   handler: { (v, _) in v.startEditing() },
@@ -180,7 +187,7 @@ class SttInputView: UIView, SttViewable {
                                     } }, textField: textView)
     }
     private func initLabel() {
-        label = UILabel(frame: CGRect(x: 8, y: 32, width: 300, height: 22))
+        label = UILabel(frame: CGRect(x: 8, y: 25, width: 300, height: 22))
         label.textAlignment = .left
         label.text = "Field"
         addSubview(label)
@@ -239,10 +246,10 @@ class SttInputView: UIView, SttViewable {
         
         UIView.animate(withDuration: isAnimate ? 0.3 : 0, animations: {
             
-            let trans  = -(self.label.bounds.width - self.label.bounds.width * 0.65) / 2
-            let translation = CGAffineTransform(translationX: trans, y: -32)
-            let scaling = CGAffineTransform(scaleX: 0.65,
-                                            y: 0.65)
+            let trans  = -(self.label.bounds.width - self.label.bounds.width * 0.575) / 2
+            let translation = CGAffineTransform(translationX: trans, y: -25)
+            let scaling = CGAffineTransform(scaleX: 0.575,
+                                            y: 0.575)
             
             self.label.transform = scaling.concatenating(translation)
             
