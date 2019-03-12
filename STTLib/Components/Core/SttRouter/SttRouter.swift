@@ -10,6 +10,9 @@ import Foundation
 import LightRoute
 import UIKit
 
+/**
+ TODO: write close with parametr
+ */
 extension SttRouterType {
     
     func navigateWithSegue<T: SttPresenterType>(to _: T.Type, parametr: Any? = nil) {

@@ -5,8 +5,6 @@
 //  Created by Standret on 30.05.18.
 //  Copyright © 2018 com.yurt.YURT. All rights reserved.
 //
-
-
 import Foundation
 import UIKit
 import RxSwift
@@ -30,10 +28,20 @@ class SttCollectionViewWithSectionSource<TCell: SttViewInjector, TSection: SttVi
     
     func updateSource(collection: SttObservableCollection<(SttObservableCollection<TCell>, TSection)>) {
         _collection = collection
-        countData = collection.map({ $0.0.count })
-        _collectionView.reloadData()
         
         disposable = DisposeBag()
+        subCollectionDisposeBag = DisposeBag()
+        
+        collection.observableObject.subscribe(onNext: { [weak self] _ in self?.subsribeOnChange() })
+            .disposed(by: disposable)
+        
+        subsribeOnChange()
+    }
+    
+    private var subCollectionDisposeBag: DisposeBag!
+    func subsribeOnChange() {
+        
+        subCollectionDisposeBag = DisposeBag()
         for index in 0..<collection.count {
             collection[index].0.observableObject.subscribe(onNext: { [weak self] (indexes, type) in
                 self?._collectionView.performBatchUpdates({ [weak self] in
@@ -51,8 +59,11 @@ class SttCollectionViewWithSectionSource<TCell: SttViewInjector, TSection: SttVi
                         self?._collectionView.reloadItems(at: indexes.map({ IndexPath(row: $0, section: index) }))
                     }
                 })
-            }).disposed(by: disposable)
+            }).disposed(by: subCollectionDisposeBag)
         }
+        
+        countData = collection.map({ $0.0.count })
+        _collectionView.reloadData()
     }
     
     init (collectionView: UICollectionView, cellIdentifiers: [SttIdentifiers], sectionIdentifier: [String], collection: SttObservableCollection<(SttObservableCollection<TCell>, TSection)>) {
@@ -85,7 +96,7 @@ class SttCollectionViewWithSectionSource<TCell: SttViewInjector, TSection: SttVi
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return countData.count
     }
-        
+    
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: _sectionIdentifier.first!, for: indexPath) as! SttCollectionReusableView<TSection>
         view.presenter = _collection?[indexPath.section].1

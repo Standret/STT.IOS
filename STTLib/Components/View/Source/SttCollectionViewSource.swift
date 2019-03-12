@@ -10,7 +10,7 @@ import Foundation
 import RxSwift
 import UIKit
 
-class SttCollectionViewSource<T: SttViewInjector>: NSObject, UICollectionViewDataSource {
+class SttCollectionViewSource<T: SttViewInjector>: NSObject, UICollectionViewDataSource, UICollectionViewDelegate {
     
     private var _collectionView: UICollectionView
     
@@ -23,6 +23,10 @@ class SttCollectionViewSource<T: SttViewInjector>: NSObject, UICollectionViewDat
     var collection: SttObservableCollection<T> { return _collection }
     
     private var disposables: Disposable?
+    
+    private var endScrollCallBack: (() -> Void)?
+    
+    var callBackEndPixel: Int = 150
     
     init(collectionView: UICollectionView, cellIdentifiers: [SttIdentifiers], collection: SttObservableCollection<T>) {
         _collectionView = collectionView
@@ -37,6 +41,7 @@ class SttCollectionViewSource<T: SttViewInjector>: NSObject, UICollectionViewDat
         
         _collectionView.dataSource = self
         updateSource(collection: collection)
+        _collectionView.delegate = self
     }
     
     func updateSource(collection: SttObservableCollection<T>) {
@@ -45,11 +50,12 @@ class SttCollectionViewSource<T: SttViewInjector>: NSObject, UICollectionViewDat
         _collectionView.reloadData()
         disposables?.dispose()
         disposables = _collection.observableObject.subscribe(onNext: { [weak self] (indexes, type) in
+            if type == .reload {
+                self?.countData = collection.count
+                self?._collectionView.reloadData()
+            }
             self?._collectionView.performBatchUpdates({ [weak self] in
                 switch type {
-                case .reload:
-                    self?.countData = collection.count
-                    self?._collectionView.reloadData()
                 case .delete:
                     self?._collectionView.deleteItems(at: indexes.map({ IndexPath(row: $0, section: 0) }))
                     self?.countData = collection.count
@@ -58,7 +64,8 @@ class SttCollectionViewSource<T: SttViewInjector>: NSObject, UICollectionViewDat
                     self?.countData = collection.count
                 case .update:
                     self?._collectionView.reloadItems(at: indexes.map({ IndexPath(row: $0, section: 0) }))
-            }
+                default: break
+                }
             })
         })
     }
@@ -81,4 +88,33 @@ class SttCollectionViewSource<T: SttViewInjector>: NSObject, UICollectionViewDat
     func collectionViewReusableCell(at indexPath: IndexPath) -> String {
         return _cellIdentifier.first!
     }
+    
+    func addEndScrollHandler<T: UIViewController>(delegate: T, callback: @escaping (T) -> Void) {
+        endScrollCallBack = { [weak delegate] in
+            if let _delegate = delegate {
+                callback(_delegate)
+            }
+        }
+    }
+    
+    // MARK: - implementation UICollectionViewDelegate
+    private var inPosition: Bool = false
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
+        let x = scrollView.contentOffset.y
+        let width = scrollView.contentSize.height - scrollView.bounds.height - CGFloat(callBackEndPixel)
+        
+        if (scrollView.contentSize.height > scrollView.bounds.height) {
+            if (x > width) {
+                if (!inPosition) {
+                    endScrollCallBack?()
+                }
+                inPosition = true
+            }
+            else {
+                inPosition = false
+            }
+        }
+    }
+    
 }

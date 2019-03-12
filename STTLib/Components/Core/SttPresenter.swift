@@ -45,7 +45,7 @@ class SttPresenter<TDelegate> : SttViewControllerInjector {
                 }
             })
     }
-    
+        
     func viewDissapearing() { }
     func viewDissapeared() {
         messageDisposable?.dispose()

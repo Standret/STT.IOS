@@ -9,7 +9,7 @@
 import Foundation
 import RxSwift
 
-protocol SttCommandType {
+protocol SttCommandType: AnyObject {
     
     var observableCanNext: Observable<Bool> { get }
     
@@ -20,6 +20,8 @@ protocol SttCommandType {
 
     func useWork(start: (() -> Void)?, end: (() -> Void)?) -> Disposable
     func useWork(handler: @escaping (Bool) -> Void) -> Disposable
+    
+    func useWork<T>(observable: Observable<T>) -> Observable<T>
 }
 
 extension SttCommandType {

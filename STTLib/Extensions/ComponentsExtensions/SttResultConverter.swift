@@ -21,6 +21,10 @@ extension ObservableType where E == (HTTPURLResponse, Data) {
             })
     }
     
+    func getResult<TResult: Decodable>() -> Observable<TResult> {
+        return self.getResult(ofType: TResult.self)
+    }
+    
     func getResult<TResult: Decodable>(ofType _: TResult.Type) -> Observable<TResult> {
         return Observable<TResult>.create({ (observer) -> Disposable in
             self.subscribe(onNext: { (urlResponse, data) in

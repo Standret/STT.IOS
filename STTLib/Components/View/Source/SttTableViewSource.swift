@@ -92,9 +92,8 @@ class SttTableViewSource<T: SttViewInjector>: NSObject, UITableViewDataSource, U
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: _cellIdentifiers.first!)! as! SttTableViewCell<T>
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier(for: indexPath))! as! SttTableViewCell<T>
         cell.presenter = _collection[indexPath.row]
-        cell.prepareBind()
         return cell
     }
     
@@ -103,6 +102,11 @@ class SttTableViewSource<T: SttViewInjector>: NSObject, UITableViewDataSource, U
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath, with presenter: T) { }
+    
+    /// Method which return cell identifier to create reusable cell
+    func cellIdentifier(for indexPath: IndexPath) -> String {
+        return cellIdentifiers.first!
+    }
     
     private var inPosition: Bool = false
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
