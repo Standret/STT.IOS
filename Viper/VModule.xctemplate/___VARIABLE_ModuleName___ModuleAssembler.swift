@@ -2,6 +2,7 @@
 
 import Swinject
 import SwinjectStoryboard
+import STT
 
 final class ___VARIABLE_ModuleName___ModuleAssembler: Assembly {
     

@@ -2,6 +2,7 @@
 
 import Foundation
 import UIKit
+import STT
 
 final class ___VARIABLE_ModuleName___TableViewSource: SttTableViewSource<___VARIABLE_ModuleName___TableViewCellPresenter> {
     
