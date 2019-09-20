@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>DefaultCompletionName</key>
+	<string>DoNotChangeThis</string>
+	<key>Kind</key>
+	<string>Xcode.IDEFoundation.TextSubstitutionFileTemplateKind</string>
+	<key>Description</key>
+	<string>A CollectionView Cell</string>
+	<key>Summary</key>
+	<string>A CollectionView Cell</string>
+	<key>SortOrder</key>
+	<string>3</string>
+	<key>AllowedTypes</key>
+	<array>
+		<string>com.apple.platform.macosx</string>
+	</array>
+	<key>Options</key>
+	<array>
+		<dict>
+			<key>Identifier</key>
+			<string>ModuleName</string>
+			<key>Required</key>
+			<true/>
+			<key>Name</key>
+			<string>Module name:</string>
+			<key>Description</key>
+			<string>Target module name</string>
+			<key>Type</key>
+			<string>text</string>
+			<key>NotPersisted</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>Values</key>
+			<array>
+				<string>CollectionView</string>
+				<string>TableView</string>
+			</array>
+			<key>Default</key>
+			<string>TableView</string>
+			<key>Type</key>
+			<string>popup</string>
+			<key>Description</key>
+			<string>The type of view to use</string>
+			<key>Name</key>
+			<string>View type:</string>
+			<key>Required</key>
+			<string>true</string>
+			<key>Identifier</key>
+			<string>viewType</string>
+		</dict>
+		<dict>
+			<key>Default</key>
+			<string>true</string>
+			<key>NotPersisted</key>
+			<true/>
+			<key>Type</key>
+			<string>checkbox</string>
+			<key>Description</key>
+			<string>Whether to create a XIB file with the same name</string>
+			<key>Name</key>
+			<string>Also create XIB file for user interface</string>
+			<key>Identifier</key>
+			<string>XIB</string>
+		</dict>
+		<dict>
+			<key>Default</key>
+			<string>true</string>
+			<key>NotPersisted</key>
+			<true/>
+			<key>Type</key>
+			<string>checkbox</string>
+			<key>Description</key>
+			<string>Whether to create a section file with the same name</string>
+			<key>Name</key>
+			<string>Also create section file for user interface</string>
+			<key>Identifier</key>
+			<string>section</string>
+		</dict>
+	</array>
+</dict>
+</plist>
