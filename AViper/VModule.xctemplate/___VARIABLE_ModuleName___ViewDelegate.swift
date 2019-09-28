@@ -3,6 +3,6 @@
 import Foundation
 import STT
 
-protocol ___VARIABLE_ModuleName___ViewDelegate: SttViewControlable {
+protocol ___VARIABLE_ModuleName___ViewDelegate: Viewable {
     
 }

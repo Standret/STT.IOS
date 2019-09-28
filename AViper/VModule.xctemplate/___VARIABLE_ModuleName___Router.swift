@@ -1,8 +1,8 @@
 //___FILEHEADER___
 
 import Foundation
-import STT
+import NGSRouter
 
-final class ___VARIABLE_ModuleName___Router: SttRouter, ___VARIABLE_ModuleName___RouterType  {
+final class ___VARIABLE_ModuleName___Router: NGSRouter, ___VARIABLE_ModuleName___RouterType {
     
 }
