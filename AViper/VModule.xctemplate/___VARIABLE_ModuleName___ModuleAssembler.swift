@@ -25,7 +25,10 @@ final class ___VARIABLE_ModuleName___ModuleAssembler: Assembly {
             storyboard: Storyboard.<#storyboard#>,
             navigatable: ___VARIABLE_ModuleName___Presenter.self,
             conigurator: { (viewController: ___VARIABLE_ModuleName___ViewController) in
-                viewController.presenter = container.resolve(___VARIABLE_ModuleName___Presenter.self, argument: viewController)!
+                viewController.presenter = container.resolve(
+                    ___VARIABLE_ModuleName___Presenter.self,
+                    argument: viewController
+                    )!
         })
     }
 }
